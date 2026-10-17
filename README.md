@@ -48,7 +48,7 @@ sudo udevadm control --reload
 sudo udevadm trigger --subsystem-match=hidraw
 ```
 
-Then add "Mouse and Keyboard" to the system tray. The daemon starts on demand through D-Bus
+Then add "Mouse" and "Keyboard" to the system tray. The daemon starts on demand through D-Bus
 activation.
 
 The udev rule `70-kde-peripherals.rules` grants the logged-in user access to the hidraw nodes

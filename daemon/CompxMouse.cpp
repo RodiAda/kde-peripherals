@@ -455,7 +455,7 @@ void CompxMouse::apply(const QString &, const QJsonObject &change)
     _error = applyChange(change);
     if (!_error.isEmpty())
         qCWarning(lcPd) << "compx apply:" << _error << QJsonDocument(change).toJson(QJsonDocument::Compact);
-    _loaded = readAll();
+    readAll();
     render();
 }
 

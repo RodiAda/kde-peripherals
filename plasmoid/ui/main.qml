@@ -17,8 +17,9 @@ PlasmoidItem {
     readonly property string objectPath: "/io/github/rodiada/Peripherals"
 
     property string devicesJson: "[]"
+    readonly property string kind: Plasmoid.metaData.pluginId.endsWith(".keyboard") ? "keyboard" : "mouse"
     readonly property bool daemonUp: watcher.registered
-    readonly property var devices: daemonUp ? parseJson(devicesJson, []) : []
+    readonly property var devices: daemonUp ? parseJson(devicesJson, []).filter(d => d.kind === kind) : []
     property string selectedId: ""
     readonly property var current: devices.find(d => d.id === selectedId) || devices[0] || null
     readonly property var sections: ["performance", "sensor", "buttons", "lighting", "keys", "power", "other"]
@@ -259,16 +260,16 @@ PlasmoidItem {
         return parts.join(" · ")
     }
 
-    Plasmoid.icon: devices.length > 0 && devices.every(d => d.kind === "keyboard") ? "input-keyboard" : "input-mouse"
+    Plasmoid.icon: kindIcon(kind)
     Plasmoid.status: lowBattery.length > 0 ? PlasmaCore.Types.NeedsAttentionStatus
         : devices.length > 0 || expanded ? PlasmaCore.Types.ActiveStatus : PlasmaCore.Types.HiddenStatus
 
-    toolTipMainText: i18n("Mouse and Keyboard")
+    toolTipMainText: kind === "keyboard" ? i18n("Keyboard") : i18n("Mouse")
     toolTipSubText: {
         if (!daemonUp)
             return i18n("peripheralsd is not running")
         if (devices.length === 0)
-            return i18n("No supported devices")
+            return kind === "keyboard" ? i18n("No supported keyboard") : i18n("No supported mouse")
         return devices.map(d => {
             const s = deviceSummary(d)
             return s.length > 0 ? d.name + ": " + s : d.name
@@ -591,10 +592,11 @@ PlasmoidItem {
             anchors.centerIn: parent
             width: parent.width - Kirigami.Units.gridUnit * 2
             visible: !root.current
-            iconName: "input-mouse"
-            text: root.daemonUp ? i18n("No supported devices") : i18n("Service not running")
+            iconName: root.kindIcon(root.kind)
+            text: root.daemonUp ? (root.kind === "keyboard" ? i18n("No supported keyboard") : i18n("No supported mouse"))
+                                : i18n("Service not running")
             explanation: root.daemonUp
-                ? i18n("Connect a supported mouse or keyboard. Access to the device is granted by the udev rule installed with this widget.")
+                ? i18n("Connect a supported device. Access to it is granted by the udev rule installed with this widget.")
                 : i18n("Start it with:\nsystemctl --user start peripheralsd")
         }
 

@@ -44,25 +44,26 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/peripheralsd.service DESTINATION ${PER
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/io.github.rodiada.Peripherals.service DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services)
 install(FILES udev/70-kde-peripherals.rules DESTINATION ${PERIPHERALS_UDEV_RULES_DIR})
 
-set(PLASMOID_ID io.github.rodiada.peripherals)
-set(PLASMOID_DIR ${CMAKE_INSTALL_DATADIR}/plasma/plasmoids/${PLASMOID_ID})
-install(FILES plasmoid/${PLASMOID_ID}/metadata.json DESTINATION ${PLASMOID_DIR})
-install(DIRECTORY plasmoid/${PLASMOID_ID}/contents/ui DESTINATION ${PLASMOID_DIR}/contents)
-
 find_program(MSGFMT_EXECUTABLE msgfmt REQUIRED)
 file(GLOB PO_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/po/*.po)
 set(MO_FILES)
-foreach(po ${PO_FILES})
-    get_filename_component(lang ${po} NAME_WE)
-    set(mo ${CMAKE_CURRENT_BINARY_DIR}/locale/${lang}/plasma_applet_${PLASMOID_ID}.mo)
-    add_custom_command(
-        OUTPUT ${mo}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/locale/${lang}
-        COMMAND ${MSGFMT_EXECUTABLE} -o ${mo} ${po}
-        DEPENDS ${po}
-    )
-    install(FILES ${mo} DESTINATION ${PLASMOID_DIR}/contents/locale/${lang}/LC_MESSAGES)
-    list(APPEND MO_FILES ${mo})
+foreach(kind mouse keyboard)
+    set(plasmoid_id io.github.rodiada.peripherals.${kind})
+    set(plasmoid_dir ${CMAKE_INSTALL_DATADIR}/plasma/plasmoids/${plasmoid_id})
+    install(FILES plasmoid/${kind}/metadata.json DESTINATION ${plasmoid_dir})
+    install(DIRECTORY plasmoid/ui DESTINATION ${plasmoid_dir}/contents)
+    foreach(po ${PO_FILES})
+        get_filename_component(lang ${po} NAME_WE)
+        set(mo ${CMAKE_CURRENT_BINARY_DIR}/locale/${lang}/plasma_applet_${plasmoid_id}.mo)
+        add_custom_command(
+            OUTPUT ${mo}
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/locale/${lang}
+            COMMAND ${MSGFMT_EXECUTABLE} -o ${mo} ${po}
+            DEPENDS ${po}
+        )
+        install(FILES ${mo} DESTINATION ${plasmoid_dir}/contents/locale/${lang}/LC_MESSAGES)
+        list(APPEND MO_FILES ${mo})
+    endforeach()
 endforeach()
 add_custom_target(translations ALL DEPENDS ${MO_FILES})
 

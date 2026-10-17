@@ -1,6 +1,5 @@
 build/
 build-*/
-plasmoid/io.github.rodiada.peripherals/contents/locale/
 packaging/arch/src/
 packaging/arch/pkg/
 packaging/arch/*.pkg.tar.*

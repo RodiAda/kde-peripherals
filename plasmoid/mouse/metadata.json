@@ -1,0 +1,23 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Rodion Adamenok"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Battery, DPI, buttons and lighting of gaming mice",
+        "Description[ru]": "Заряд, DPI, кнопки и подсветка игровых мышей",
+        "Icon": "input-mouse",
+        "Id": "io.github.rodiada.peripherals.mouse",
+        "License": "MIT",
+        "Name": "Mouse",
+        "Name[ru]": "Мышь",
+        "Version": "0.1.0",
+        "Website": "https://github.com/RodiAda/kde-peripherals"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-NotificationArea": "true",
+    "X-Plasma-NotificationAreaCategory": "Hardware"
+}
