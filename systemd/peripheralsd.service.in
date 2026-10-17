@@ -1,0 +1,14 @@
+[Unit]
+Description=Mouse and keyboard control daemon (D-Bus io.github.rodiada.Peripherals)
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=dbus
+BusName=io.github.rodiada.Peripherals
+ExecStart=@CMAKE_INSTALL_FULL_BINDIR@/peripheralsd
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

@@ -1,0 +1,390 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: kde-peripherals\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+msgid "Cable"
+msgstr "Кабель"
+
+msgid "Receiver"
+msgstr "Приёмник"
+
+msgid "Bluetooth"
+msgstr "Bluetooth"
+
+msgid "Performance"
+msgstr "Производительность"
+
+msgid "Sensor"
+msgstr "Сенсор"
+
+msgid "Buttons"
+msgstr "Кнопки"
+
+msgid "Lighting"
+msgstr "Подсветка"
+
+msgid "Keys"
+msgstr "Клавиши"
+
+msgid "Power"
+msgstr "Питание"
+
+msgid "Other"
+msgstr "Прочее"
+
+msgctxt "unit"
+msgid "%1 Hz"
+msgstr "%1 Гц"
+
+msgctxt "unit"
+msgid "%1 mm"
+msgstr "%1 мм"
+
+msgctxt "unit"
+msgid "%1 ms"
+msgstr "%1 мс"
+
+msgctxt "unit"
+msgid "%1 s"
+msgstr "%1 с"
+
+msgctxt "unit"
+msgid "%1 min"
+msgstr "%1 мин"
+
+msgctxt "unit"
+msgid "%1°"
+msgstr "%1°"
+
+msgctxt "unit"
+msgid "%1%"
+msgstr "%1%"
+
+msgid "DPI"
+msgstr "DPI"
+
+msgid "Polling rate"
+msgstr "Частота опроса"
+
+msgid "Lift-off distance"
+msgstr "Высота отрыва"
+
+msgid "Sensor mode"
+msgstr "Режим сенсора"
+
+msgid "Basic"
+msgstr "Обычный"
+
+msgid "Competitive"
+msgstr "Соревновательный"
+
+msgid "Competitive MAX"
+msgstr "Соревновательный MAX"
+
+msgid "Motion sync"
+msgstr "Motion Sync"
+
+msgid "Angle snapping"
+msgstr "Выпрямление линий"
+
+msgid "Ripple control"
+msgstr "Подавление дрожания"
+
+msgid "Sensor angle"
+msgstr "Угол сенсора"
+
+msgid "Debounce time"
+msgstr "Время антидребезга"
+
+msgid "Left button"
+msgstr "Левая кнопка"
+
+msgid "Right button"
+msgstr "Правая кнопка"
+
+msgid "Middle button"
+msgstr "Средняя кнопка"
+
+msgid "Back button"
+msgstr "Кнопка «Назад»"
+
+msgid "Forward button"
+msgstr "Кнопка «Вперёд»"
+
+msgid "Left click"
+msgstr "Левый клик"
+
+msgid "Right click"
+msgstr "Правый клик"
+
+msgid "Middle click"
+msgstr "Средний клик"
+
+msgid "Back"
+msgstr "Назад"
+
+msgid "Forward"
+msgstr "Вперёд"
+
+msgid "DPI cycle"
+msgstr "Переключение DPI"
+
+msgid "DPI up"
+msgstr "DPI выше"
+
+msgid "DPI down"
+msgstr "DPI ниже"
+
+msgid "Scroll up"
+msgstr "Прокрутка вверх"
+
+msgid "Scroll down"
+msgstr "Прокрутка вниз"
+
+msgid "Scroll left"
+msgstr "Прокрутка влево"
+
+msgid "Scroll right"
+msgstr "Прокрутка вправо"
+
+msgid "Disabled"
+msgstr "Отключена"
+
+msgid "Custom"
+msgstr "Своё"
+
+msgid "Sleep after"
+msgstr "Засыпать через"
+
+msgid "Long-distance mode"
+msgstr "Режим дальней связи"
+
+msgid "DPI indicator"
+msgstr "Индикатор DPI"
+
+msgid "Effect"
+msgstr "Эффект"
+
+msgid "Steady"
+msgstr "Статичный"
+
+msgid "Breathing"
+msgstr "Дыхание"
+
+msgid "Brightness"
+msgstr "Яркость"
+
+msgid "Speed"
+msgstr "Скорость"
+
+msgid "Low"
+msgstr "Низкая"
+
+msgid "Medium"
+msgstr "Средняя"
+
+msgid "High"
+msgstr "Высокая"
+
+msgid "Slow"
+msgstr "Медленно"
+
+msgid "Fast"
+msgstr "Быстро"
+
+msgid "Off"
+msgstr "Выкл."
+
+msgid "On"
+msgstr "Вкл."
+
+msgid "Color"
+msgstr "Цвет"
+
+msgid "Direction"
+msgstr "Направление"
+
+msgid "Mode"
+msgstr "Режим"
+
+msgid "Never"
+msgstr "Никогда"
+
+msgid "Rainbow colors"
+msgstr "Радужные цвета"
+
+msgid "Lighting off after"
+msgstr "Гасить подсветку через"
+
+msgid "Neon Stream"
+msgstr "Неоновый поток"
+
+msgid "Ripples Shining"
+msgstr "Сияющая рябь"
+
+msgid "Rotating Windmill"
+msgstr "Вращающаяся мельница"
+
+msgid "Sine Wave"
+msgstr "Синусоида"
+
+msgid "Rainbow Roulette"
+msgstr "Радужная рулетка"
+
+msgid "Stars Twinkle"
+msgstr "Мерцание звёзд"
+
+msgid "Layer Upon Layer"
+msgstr "Слой за слоем"
+
+msgid "Rich and Honored"
+msgstr "Богатство и почёт"
+
+msgid "Marquee Effect"
+msgstr "Бегущая строка"
+
+msgid "Rotating Storm"
+msgstr "Вращающийся шторм"
+
+msgid "Serpentine Horse Race"
+msgstr "Змеиные скачки"
+
+msgid "Retro Snake"
+msgstr "Ретро-змейка"
+
+msgid "Diagonal Transformation"
+msgstr "Диагональная волна"
+
+msgid "Ambilight"
+msgstr "Ambilight"
+
+msgid "Streamer"
+msgstr "Стример"
+
+msgid "Neon"
+msgstr "Неон"
+
+msgid "Shadow Disappear"
+msgstr "Исчезающая тень"
+
+msgid "Flash Away"
+msgstr "Вспышка"
+
+msgid "Scroll wheel"
+msgstr "Колесо прокрутки"
+
+msgid "Ratchet"
+msgstr "С трещоткой"
+
+msgid "Free spin"
+msgstr "Свободное вращение"
+
+msgid "SmartShift"
+msgstr "SmartShift"
+
+msgid "SmartShift sensitivity"
+msgstr "Чувствительность SmartShift"
+
+msgid "High-resolution scrolling"
+msgstr "Плавная прокрутка высокого разрешения"
+
+msgid "Natural scrolling"
+msgstr "Естественная прокрутка"
+
+msgid "Media keys without Fn"
+msgstr "Медиаклавиши без Fn"
+
+msgid "Easy-Switch channel"
+msgstr "Канал Easy-Switch"
+
+msgid "Device is asleep"
+msgstr "Устройство спит"
+
+msgid "Unsupported polling rate"
+msgstr "Эта частота опроса не поддерживается"
+
+msgid "Unsupported lift-off distance"
+msgstr "Эта высота отрыва не поддерживается"
+
+msgid "Invalid DPI stages"
+msgstr "Неверные ступени DPI"
+
+msgid "Invalid button action"
+msgstr "Неверное действие кнопки"
+
+msgid "Mouse is asleep"
+msgstr "Мышь спит"
+
+msgid "Write failed"
+msgstr "Не удалось записать настройку"
+
+msgid "Invalid value"
+msgstr "Недопустимое значение"
+
+msgid "At least one button must keep the left click"
+msgstr "Хотя бы одна кнопка должна остаться левым кликом"
+
+msgid "Channel %1"
+msgstr "Канал %1"
+
+msgid "asleep"
+msgstr "спит"
+
+msgid "%1%, charging"
+msgstr "%1%, заряжается"
+
+msgid "%1%"
+msgstr "%1%"
+
+msgid "Mouse and Keyboard"
+msgstr "Мышь и клавиатура"
+
+msgid "peripheralsd is not running"
+msgstr "peripheralsd не запущена"
+
+msgid "No supported devices"
+msgstr "Нет поддерживаемых устройств"
+
+msgid "DPI stages"
+msgstr "Ступени DPI"
+
+msgid "Remove stage"
+msgstr "Убрать ступень"
+
+msgid "Add stage"
+msgstr "Добавить ступень"
+
+msgid "firmware %1"
+msgstr "прошивка %1"
+
+msgid "Service not running"
+msgstr "Служба не запущена"
+
+msgid "Connect a supported mouse or keyboard. Access to the device is granted by the udev rule installed with this widget."
+msgstr "Подключите поддерживаемую мышь или клавиатуру. Доступ к устройству даёт правило udev, которое ставится вместе с виджетом."
+
+msgid "Start it with:\nsystemctl --user start peripheralsd"
+msgstr "Запустите её командой:\nsystemctl --user start peripheralsd"
+
+msgid "Support for this device has not been tested on real hardware yet."
+msgstr "Поддержка этого устройства ещё не проверялась на настоящем железе."
+
+msgid "Report how it works"
+msgstr "Сообщить, как работает"
+
+msgid "The keyboard is asleep or out of range. Press any key to wake it up."
+msgstr "Клавиатура спит или вне зоны связи. Нажмите любую клавишу, чтобы разбудить её."
+
+msgid "The mouse is asleep or out of range. Move it to wake it up."
+msgstr "Мышь спит или вне зоны связи. Подвигайте её, чтобы разбудить."
+
+msgid "This keyboard cannot report its settings. The values below are the last ones set from this widget; changes made with Fn shortcuts are not shown."
+msgstr "Клавиатура не умеет сообщать свои настройки. Ниже — последние значения, заданные из этого виджета; изменения через сочетания с Fn здесь не видны."
+
+msgid "This keyboard cannot report its settings. The values below are defaults until you change something here."
+msgstr "Клавиатура не умеет сообщать свои настройки. Пока вы ничего здесь не измените, ниже показаны значения по умолчанию."

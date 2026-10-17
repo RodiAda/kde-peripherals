@@ -1,0 +1,78 @@
+cmake_minimum_required(VERSION 3.25)
+project(kde-peripherals VERSION 0.1.0 LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+set(CMAKE_AUTOMOC ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Core DBus Gui)
+include(GNUInstallDirs)
+
+add_library(peripherals-core STATIC
+    daemon/Hidraw.cpp
+    daemon/Device.cpp
+    daemon/Log.cpp
+    daemon/Registry.cpp
+    daemon/CompxProtocol.cpp
+    daemon/CompxMouse.cpp
+    daemon/HidppProtocol.cpp
+    daemon/LogitechDevice.cpp
+    daemon/RkProtocol.cpp
+    daemon/RkKeyboard.cpp
+)
+target_include_directories(peripherals-core PUBLIC daemon)
+target_link_libraries(peripherals-core PUBLIC Qt6::Core Qt6::DBus Qt6::Gui)
+
+add_executable(peripheralsd daemon/main.cpp daemon/PeripheralsService.cpp)
+target_link_libraries(peripheralsd PRIVATE peripherals-core)
+install(TARGETS peripheralsd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+if (CMAKE_INSTALL_PREFIX STREQUAL "/usr")
+    set(_unit_dir "lib/systemd/user")
+    set(_udev_dir "lib/udev/rules.d")
+else()
+    set(_unit_dir "${CMAKE_INSTALL_DATADIR}/systemd/user")
+    set(_udev_dir "${CMAKE_INSTALL_LIBDIR}/udev/rules.d")
+endif()
+set(PERIPHERALS_SYSTEMD_USER_UNIT_DIR "${_unit_dir}" CACHE PATH "Where to install the systemd user unit")
+set(PERIPHERALS_UDEV_RULES_DIR "${_udev_dir}" CACHE PATH "Where to install the udev rules")
+
+configure_file(systemd/peripheralsd.service.in peripheralsd.service @ONLY)
+configure_file(systemd/io.github.rodiada.Peripherals.service.in io.github.rodiada.Peripherals.service @ONLY)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/peripheralsd.service DESTINATION ${PERIPHERALS_SYSTEMD_USER_UNIT_DIR})
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/io.github.rodiada.Peripherals.service DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services)
+install(FILES udev/70-kde-peripherals.rules DESTINATION ${PERIPHERALS_UDEV_RULES_DIR})
+
+set(PLASMOID_ID io.github.rodiada.peripherals)
+set(PLASMOID_DIR ${CMAKE_INSTALL_DATADIR}/plasma/plasmoids/${PLASMOID_ID})
+install(FILES plasmoid/${PLASMOID_ID}/metadata.json DESTINATION ${PLASMOID_DIR})
+install(DIRECTORY plasmoid/${PLASMOID_ID}/contents/ui DESTINATION ${PLASMOID_DIR}/contents)
+
+find_program(MSGFMT_EXECUTABLE msgfmt REQUIRED)
+file(GLOB PO_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/po/*.po)
+set(MO_FILES)
+foreach(po ${PO_FILES})
+    get_filename_component(lang ${po} NAME_WE)
+    set(mo ${CMAKE_CURRENT_BINARY_DIR}/locale/${lang}/plasma_applet_${PLASMOID_ID}.mo)
+    add_custom_command(
+        OUTPUT ${mo}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/locale/${lang}
+        COMMAND ${MSGFMT_EXECUTABLE} -o ${mo} ${po}
+        DEPENDS ${po}
+    )
+    install(FILES ${mo} DESTINATION ${PLASMOID_DIR}/contents/locale/${lang}/LC_MESSAGES)
+    list(APPEND MO_FILES ${mo})
+endforeach()
+add_custom_target(translations ALL DEPENDS ${MO_FILES})
+
+option(PERIPHERALS_TESTS "Build tests" OFF)
+if (PERIPHERALS_TESTS)
+    file(GLOB TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tests/*_test.cpp)
+    foreach(test_source ${TEST_SOURCES})
+        get_filename_component(test_name ${test_source} NAME_WE)
+        string(REPLACE "_test" "-test" test_target ${test_name})
+        add_executable(${test_target} ${test_source})
+        target_link_libraries(${test_target} PRIVATE peripherals-core)
+    endforeach()
+endif()

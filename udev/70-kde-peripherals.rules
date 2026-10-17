@@ -1,0 +1,5 @@
+KERNEL=="hidraw*", ATTRS{idVendor}=="373b", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="258a", ATTRS{idProduct}=="0089", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="25a7", ATTRS{idProduct}=="fa70", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="046d", TAG+="uaccess"
+KERNEL=="hidraw*", KERNELS=="0005:046D:*", TAG+="uaccess"

@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=io.github.rodiada.Peripherals
+Exec=@CMAKE_INSTALL_FULL_BINDIR@/peripheralsd
+SystemdService=peripheralsd.service

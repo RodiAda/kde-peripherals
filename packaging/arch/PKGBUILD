@@ -1,0 +1,33 @@
+# Maintainer: Rodion Adamenok <https://github.com/RodiAda>
+
+pkgname=kde-peripherals
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="KDE Plasma tray widget for gaming mice and keyboards (ATK/MADLIONS, Royal Kludge, Logitech HID++)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/RodiAda/kde-peripherals"
+license=('MIT')
+depends=('glibc' 'libgcc' 'libstdc++' 'qt6-base' 'qt6-declarative' 'libplasma' 'kirigami'
+         'plasma-workspace' 'dbus' 'systemd')
+makedepends=('cmake' 'ninja' 'git' 'gettext')
+source=("git+$url.git#tag=v$pkgver")
+sha256sums=('SKIP')
+
+build() {
+  cmake -B build -S "$pkgname" -G Ninja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DPERIPHERALS_TESTS=ON
+  cmake --build build
+}
+
+check() {
+  for t in build/*-test; do
+    "$t"
+  done
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+  install -Dm644 "$pkgname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
