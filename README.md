@@ -11,7 +11,7 @@ Windows or web software.
 |---|---|---|---|
 | MADLIONS MAD R+ (Compx chip, `373b:1040` MAD 8K dongle) | 2.4 GHz dongle | battery, voltage, DPI stages, polling rate up to 8 kHz, lift-off distance, sensor mode, motion sync, angle snapping, ripple control, sensor angle, debounce, button mapping, sleep timeout, long-distance mode, DPI indicator | tested |
 | MAD R, MAD R Major, MAD R Major+ and other ATK/Compx mice | 2.4 GHz dongle | same protocol | untested |
-| Royal Kludge RK96 RGB (`258a:0089`) | USB cable | lighting effect, brightness, speed, colour, rainbow mode, lighting timeout | tested |
+| Royal Kludge RK96 RGB (`258a:0089`) | USB cable | lighting effect, brightness, speed, colour, rainbow mode, lighting timeout | commands accepted on real hardware; colour order not confirmed yet |
 | Xbox, Steam Controller, DualSense and other gamepads | Bluetooth, receiver, USB | battery and connection state from the kernel (power_supply) or BlueZ, disconnect button for Bluetooth controllers | Xbox Wireless Controller over Bluetooth: untested |
 | Logitech HID++ 2.0 devices | Unifying, Bolt, Lightspeed receivers, Bluetooth, USB | battery, DPI, polling rate, SmartShift, wheel mode, high-resolution and natural scrolling, Fn inversion, Easy-Switch channel | untested |
 
