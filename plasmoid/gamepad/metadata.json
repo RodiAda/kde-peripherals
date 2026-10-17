@@ -1,0 +1,23 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Name": "Rodion Adamenok"
+            }
+        ],
+        "Category": "System Information",
+        "Description": "Battery and connection of Xbox, Steam and other game controllers",
+        "Description[ru]": "Заряд и подключение геймпадов Xbox, Steam и других",
+        "Icon": "input-gaming",
+        "Id": "io.github.rodiada.peripherals.gamepad",
+        "License": "MIT",
+        "Name": "Gamepad",
+        "Name[ru]": "Геймпад",
+        "Version": "0.1.0",
+        "Website": "https://github.com/RodiAda/kde-peripherals"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0",
+    "X-Plasma-NotificationArea": "true",
+    "X-Plasma-NotificationAreaCategory": "Hardware"
+}

@@ -17,7 +17,7 @@ PlasmoidItem {
     readonly property string objectPath: "/io/github/rodiada/Peripherals"
 
     property string devicesJson: "[]"
-    readonly property string kind: Plasmoid.metaData.pluginId.endsWith(".keyboard") ? "keyboard" : "mouse"
+    readonly property string kind: Plasmoid.metaData.pluginId.split(".").pop()
     readonly property bool daemonUp: watcher.registered
     readonly property var devices: daemonUp ? parseJson(devicesJson, []).filter(d => d.kind === kind) : []
     property string selectedId: ""
@@ -103,7 +103,17 @@ PlasmoidItem {
     }
 
     function kindIcon(kind) {
-        return kind === "keyboard" ? "input-keyboard" : "input-mouse"
+        return kind === "keyboard" ? "input-keyboard" : kind === "gamepad" ? "input-gaming" : "input-mouse"
+    }
+
+    function kindTitle(kind) {
+        return kind === "keyboard" ? i18n("Keyboard") : kind === "gamepad" ? i18n("Gamepad") : i18n("Mouse")
+    }
+
+    function noDevicesText(kind) {
+        return kind === "keyboard" ? i18n("No supported keyboard")
+            : kind === "gamepad" ? i18n("No gamepad connected")
+            : i18n("No supported mouse")
     }
 
     function batteryIcon(level, charging) {
@@ -199,6 +209,7 @@ PlasmoidItem {
         case "Direction": return i18n("Direction")
         case "Mode": return i18n("Mode")
         case "Never": return i18n("Never")
+        case "Disconnect": return i18n("Disconnect")
         case "Rainbow colors": return i18n("Rainbow colors")
         case "Lighting off after": return i18n("Lighting off after")
         case "Neon Stream": return i18n("Neon Stream")
@@ -264,12 +275,12 @@ PlasmoidItem {
     Plasmoid.status: lowBattery.length > 0 ? PlasmaCore.Types.NeedsAttentionStatus
         : devices.length > 0 || expanded ? PlasmaCore.Types.ActiveStatus : PlasmaCore.Types.HiddenStatus
 
-    toolTipMainText: kind === "keyboard" ? i18n("Keyboard") : i18n("Mouse")
+    toolTipMainText: kindTitle(kind)
     toolTipSubText: {
         if (!daemonUp)
             return i18n("peripheralsd is not running")
         if (devices.length === 0)
-            return kind === "keyboard" ? i18n("No supported keyboard") : i18n("No supported mouse")
+            return noDevicesText(kind)
         return devices.map(d => {
             const s = deviceSummary(d)
             return s.length > 0 ? d.name + ": " + s : d.name
@@ -593,11 +604,10 @@ PlasmoidItem {
             width: parent.width - Kirigami.Units.gridUnit * 2
             visible: !root.current
             iconName: root.kindIcon(root.kind)
-            text: root.daemonUp ? (root.kind === "keyboard" ? i18n("No supported keyboard") : i18n("No supported mouse"))
-                                : i18n("Service not running")
-            explanation: root.daemonUp
-                ? i18n("Connect a supported device. Access to it is granted by the udev rule installed with this widget.")
-                : i18n("Start it with:\nsystemctl --user start peripheralsd")
+            text: root.daemonUp ? root.noDevicesText(root.kind) : i18n("Service not running")
+            explanation: !root.daemonUp ? i18n("Start it with:\nsystemctl --user start peripheralsd")
+                : root.kind === "gamepad" ? i18n("Turn on a controller connected over Bluetooth, a receiver or a cable.")
+                : i18n("Connect a supported device. Access to it is granted by the udev rule installed with this widget.")
         }
 
         PlasmaComponents3.ScrollView {
@@ -635,8 +645,9 @@ PlasmoidItem {
                     Layout.fillWidth: true
                     visible: !!content.device && content.device.online === false
                     type: Kirigami.MessageType.Information
-                    text: content.device && content.device.kind === "keyboard"
-                        ? i18n("The keyboard is asleep or out of range. Press any key to wake it up.")
+                    text: !content.device ? ""
+                        : content.device.kind === "keyboard" ? i18n("The keyboard is asleep or out of range. Press any key to wake it up.")
+                        : content.device.kind === "gamepad" ? i18n("The controller is off or out of range.")
                         : i18n("The mouse is asleep or out of range. Move it to wake it up.")
                 }
 

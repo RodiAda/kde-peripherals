@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 
 #include "Device.h"
+#include "GamepadSource.h"
 #include "Log.h"
 #include "Registry.h"
 
@@ -19,7 +20,31 @@ PeripheralsService::PeripheralsService(QObject *parent)
     _rescan.setInterval(10000);
     connect(&_rescan, &QTimer::timeout, this, &PeripheralsService::scan);
     _rescan.start();
+    attach(QStringLiteral("virtual|gamepads"), new GamepadSource(HidrawInfo{}));
     scan();
+}
+
+void PeripheralsService::attach(const QString &key, Device *device)
+{
+    auto *thread = new QThread(this);
+    device->moveToThread(thread);
+    connect(thread, &QThread::finished, device, &QObject::deleteLater);
+    connect(device, &Device::entriesChanged, this, [this, key](const QJsonArray &entries) {
+        auto it = _slots.find(key);
+        if (it == _slots.end())
+            return;
+        it->entries = entries;
+        publishState();
+    });
+    connect(device, &Device::gone, this, [this, key] {
+        QTimer::singleShot(0, this, [this, key] {
+            remove(key);
+            publishState();
+        });
+    });
+    _slots.insert(key, Slot{thread, device, {}});
+    thread->start();
+    QMetaObject::invokeMethod(device, &Device::start, Qt::QueuedConnection);
 }
 
 PeripheralsService::~PeripheralsService()
@@ -41,26 +66,7 @@ void PeripheralsService::scan()
             seen.insert(key);
             if (_slots.contains(key))
                 break;
-            Device *device = driver.create(info);
-            auto *thread = new QThread(this);
-            device->moveToThread(thread);
-            connect(thread, &QThread::finished, device, &QObject::deleteLater);
-            connect(device, &Device::entriesChanged, this, [this, key](const QJsonArray &entries) {
-                auto it = _slots.find(key);
-                if (it == _slots.end())
-                    return;
-                it->entries = entries;
-                publishState();
-            });
-            connect(device, &Device::gone, this, [this, key] {
-                QTimer::singleShot(0, this, [this, key] {
-                    remove(key);
-                    publishState();
-                });
-            });
-            _slots.insert(key, Slot{thread, device, {}});
-            thread->start();
-            QMetaObject::invokeMethod(device, &Device::start, Qt::QueuedConnection);
+            attach(key, driver.create(info));
             qCInfo(lcPd) << "attached" << driver.name << info.node << info.name;
             break;
         }
@@ -68,7 +74,7 @@ void PeripheralsService::scan()
     const QStringList keys = _slots.keys();
     bool changed = false;
     for (const QString &key : keys) {
-        if (!seen.contains(key)) {
+        if (!seen.contains(key) && !key.startsWith(QLatin1String("virtual|"))) {
             remove(key);
             changed = true;
         }

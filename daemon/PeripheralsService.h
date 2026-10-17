@@ -37,6 +37,7 @@ private:
     };
 
     void scan();
+    void attach(const QString &key, Device *device);
     void remove(const QString &key);
     void publishState();
 

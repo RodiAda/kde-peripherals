@@ -20,6 +20,7 @@ add_library(peripherals-core STATIC
     daemon/LogitechDevice.cpp
     daemon/RkProtocol.cpp
     daemon/RkKeyboard.cpp
+    daemon/GamepadSource.cpp
 )
 target_include_directories(peripherals-core PUBLIC daemon)
 target_link_libraries(peripherals-core PUBLIC Qt6::Core Qt6::DBus Qt6::Gui)
@@ -47,7 +48,7 @@ install(FILES udev/70-kde-peripherals.rules DESTINATION ${PERIPHERALS_UDEV_RULES
 find_program(MSGFMT_EXECUTABLE msgfmt REQUIRED)
 file(GLOB PO_FILES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/po/*.po)
 set(MO_FILES)
-foreach(kind mouse keyboard)
+foreach(kind mouse keyboard gamepad)
     set(plasmoid_id io.github.rodiada.peripherals.${kind})
     set(plasmoid_dir ${CMAKE_INSTALL_DATADIR}/plasma/plasmoids/${plasmoid_id})
     install(FILES plasmoid/${kind}/metadata.json DESTINATION ${plasmoid_dir})
