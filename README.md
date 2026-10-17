@@ -32,11 +32,31 @@ Devices marked untested show a banner in the widget with a link to report how th
 
 ## Installation
 
-### Arch Linux
+### Packages
+
+Every [release](https://github.com/RodiAda/kde-peripherals/releases/latest) ships packages for Arch Linux
+(`.pkg.tar.zst`), Debian 13 / Ubuntu (`.deb`) and Fedora (`.rpm`).
+
+```
+sudo pacman -U kde-peripherals-*.pkg.tar.zst     # Arch
+sudo apt install ./kde-peripherals_*_amd64.deb   # Debian, Ubuntu
+sudo dnf install ./kde-peripherals-*.rpm         # Fedora
+```
+
+### Arch Linux from source
 
 ```
 cd packaging/arch
 makepkg -si
+```
+
+`packaging/arch-git` builds the latest commit.
+
+### Into your home directory
+
+```
+./install.sh      # builds into ~/.local; installs only the udev rule system-wide (asks for sudo)
+./uninstall.sh
 ```
 
 ### From source

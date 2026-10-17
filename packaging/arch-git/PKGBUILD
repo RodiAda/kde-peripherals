@@ -1,0 +1,41 @@
+# Maintainer: Rodion Adamenok <https://github.com/RodiAda>
+
+pkgname=kde-peripherals-git
+_pkgname=kde-peripherals
+pkgver=0.1.0.r0.g0000000
+pkgrel=1
+pkgdesc="KDE Plasma tray widgets for gaming mice, keyboards and gamepads (git version)"
+arch=('x86_64' 'aarch64')
+url="https://github.com/RodiAda/kde-peripherals"
+license=('MIT')
+depends=('glibc' 'libgcc' 'libstdc++' 'qt6-base' 'qt6-declarative' 'libplasma' 'kirigami'
+         'plasma-workspace' 'dbus' 'systemd')
+makedepends=('cmake' 'ninja' 'git' 'gettext')
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+source=("git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$srcdir/$_pkgname"
+  git describe --long --tags --abbrev=7 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+  cmake -B build -S "$_pkgname" -G Ninja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DPERIPHERALS_TESTS=ON
+  cmake --build build
+}
+
+check() {
+  for t in build/*-test; do
+    "$t"
+  done
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+  install -Dm644 "$_pkgname/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

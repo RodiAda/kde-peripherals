@@ -3,7 +3,7 @@
 pkgname=kde-peripherals
 pkgver=0.1.0
 pkgrel=1
-pkgdesc="KDE Plasma tray widget for gaming mice and keyboards (ATK/MADLIONS, Royal Kludge, Logitech HID++)"
+pkgdesc="KDE Plasma tray widgets for gaming mice, keyboards and gamepads"
 arch=('x86_64' 'aarch64')
 url="https://github.com/RodiAda/kde-peripherals"
 license=('MIT')
