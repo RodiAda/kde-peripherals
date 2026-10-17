@@ -104,7 +104,7 @@ void RkKeyboard::render()
         sleep.append(QJsonObject{{QStringLiteral("value"), i + 1}, {QStringLiteral("number"), minutes[i]},
                                  {QStringLiteral("unit"), QStringLiteral("min")}});
     sleep.append(option(5, QStringLiteral("Never")));
-    controls.append(choice(QStringLiteral("sleep"), QStringLiteral("power"), QStringLiteral("Lighting off after"),
+    controls.append(choice(QStringLiteral("sleep"), QStringLiteral("lighting"), QStringLiteral("Lighting off after"),
                            _lighting.sleep, sleep));
     e[QStringLiteral("controls")] = controls;
     publish({e});

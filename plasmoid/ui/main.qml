@@ -23,6 +23,10 @@ PlasmoidItem {
     property string selectedId: ""
     readonly property var current: devices.find(d => d.id === selectedId) || devices[0] || null
     readonly property var sections: ["performance", "sensor", "buttons", "lighting", "keys", "power", "other"]
+    readonly property var currentSections: current && current.controls
+        ? sections.filter(s => current.controls.some(c => (c.section || "other") === s)) : []
+    property string currentSection: ""
+    readonly property string shownSection: currentSections.indexOf(currentSection) >= 0 ? currentSection : (currentSections[0] || "")
     readonly property var lowBattery: devices.filter(d => d.battery !== undefined && d.battery <= 15 && !d.charging)
 
     function parseJson(text, fallback) {
@@ -134,7 +138,7 @@ PlasmoidItem {
 
     function sectionLabel(s) {
         switch (s) {
-        case "performance": return i18n("Performance")
+        case "performance": return i18n("Main")
         case "sensor": return i18n("Sensor")
         case "buttons": return i18n("Buttons")
         case "lighting": return i18n("Lighting")
@@ -595,6 +599,19 @@ PlasmoidItem {
                         text: root.current && root.current.battery !== undefined ? i18n("%1%", root.current.battery) : ""
                     }
                 }
+                PlasmaComponents3.TabBar {
+                    Layout.fillWidth: true
+                    visible: root.currentSections.length > 1
+                    currentIndex: root.currentSections.indexOf(root.shownSection)
+                    Repeater {
+                        model: root.currentSections
+                        delegate: PlasmaComponents3.TabButton {
+                            required property string modelData
+                            text: root.sectionLabel(modelData)
+                            onClicked: root.currentSection = modelData
+                        }
+                    }
+                }
             }
         }
 
@@ -668,16 +685,12 @@ PlasmoidItem {
                 }
 
                 Repeater {
-                    model: root.sections.filter(s => content.controls.some(c => (c.section || "other") === s))
+                    model: root.shownSection.length > 0 ? [root.shownSection] : []
                     delegate: ColumnLayout {
                         id: sectionBlock
                         required property string modelData
                         Layout.fillWidth: true
                         spacing: Kirigami.Units.smallSpacing
-                        Kirigami.Heading {
-                            level: 4
-                            text: root.sectionLabel(sectionBlock.modelData)
-                        }
                         Repeater {
                             model: content.controls.filter(c => (c.section || "other") === sectionBlock.modelData)
                             delegate: Loader {
