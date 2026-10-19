@@ -239,7 +239,7 @@ PlasmoidItem {
         case "Free spin": return i18n("Free spin")
         case "SmartShift": return i18n("SmartShift")
         case "SmartShift sensitivity": return i18n("SmartShift sensitivity")
-        case "High-resolution scrolling": return i18n("High-resolution scrolling")
+        case "Invert thumb wheel": return i18n("Invert thumb wheel")
         case "Natural scrolling": return i18n("Natural scrolling")
         case "Media keys without Fn": return i18n("Media keys without Fn")
         case "Easy-Switch channel": return i18n("Easy-Switch channel")

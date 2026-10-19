@@ -13,7 +13,7 @@ Windows or web software.
 | MAD R, MAD R Major, MAD R Major+ and other ATK/Compx mice | 2.4 GHz dongle | same protocol | untested |
 | Royal Kludge RK96 RGB (`258a:0089`) | USB cable | lighting effect, brightness, speed, colour, rainbow mode, lighting timeout | commands accepted on real hardware; colour order not confirmed yet |
 | Xbox, Steam Controller, DualSense and other gamepads | Bluetooth, receiver, USB | battery and connection state from the kernel (power_supply) or BlueZ, disconnect button for Bluetooth controllers | Xbox Wireless Controller over Bluetooth: untested |
-| Logitech HID++ 2.0 devices | Unifying, Bolt, Lightspeed receivers, Bluetooth, USB | battery, DPI, polling rate, SmartShift, wheel mode, high-resolution and natural scrolling, Fn inversion, Easy-Switch channel | untested |
+| Logitech HID++ 2.0 devices | Unifying, Bolt, Lightspeed receivers, Bluetooth, USB | battery, firmware, DPI, polling rate, SmartShift, wheel mode, natural scrolling, thumb wheel direction, Fn inversion, Easy-Switch channel | MX Master 4 over Bluetooth: tested; other models untested |
 
 Devices marked untested show a banner in the widget with a link to report how they work.
 
@@ -28,7 +28,9 @@ Devices marked untested show a banner in the widget with a link to report how th
   not visible. Only the wired connection carries configuration commands; over 2.4 GHz and
   Bluetooth the keyboard cannot be configured.
 * **Logitech**: only features that cannot break input are exposed. Scroll events are never
-  diverted to HID++, buttons are not remapped.
+  diverted to HID++, buttons are not remapped, and high-resolution scrolling is left alone: unless the
+  kernel's `hid-logitech-hidpp` driver handles the device, turning it on makes the wheel scroll several
+  times faster.
 
 ## Installation
 

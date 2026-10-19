@@ -24,6 +24,7 @@ enum Feature : uint16_t {
     SmartShift = 0x2110,
     SmartShiftEnhanced = 0x2111,
     HiresWheel = 0x2121,
+    ThumbWheel = 0x2150,
     AdjustableDpi = 0x2201,
     FnInversion = 0x40A0,
     NewFnInversion = 0x40A2,

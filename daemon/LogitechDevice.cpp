@@ -173,13 +173,19 @@ void LogitechDevice::load(Slot &slot)
         if (type.ok)
             slot.type = uint8_t(type.params[0]);
     }
-    const Reply fw = call(slot, FirmwareVersion, 1, QByteArray(1, '\0'));
-    if (fw.ok) {
-        const QString prefix = QString::fromLatin1(fw.params.mid(1, 3)).trimmed();
-        slot.firmware = QStringLiteral("%1 %2.%3")
-                            .arg(prefix)
+    const Reply entities = call(slot, FirmwareVersion, 0);
+    for (int e = 0; entities.ok && e < uint8_t(entities.params[0]); ++e) {
+        const Reply fw = call(slot, FirmwareVersion, 1, QByteArray(1, char(e)));
+        if (!fw.ok || uint8_t(fw.params[0]) != 0)
+            continue;
+        QByteArray prefix = fw.params.mid(1, 3);
+        prefix.replace('\0', QByteArray());
+        slot.firmware = QStringLiteral("%1 %2.%3.B%4")
+                            .arg(QString::fromLatin1(prefix).trimmed())
                             .arg(uint8_t(fw.params[4]), 2, 16, QLatin1Char('0'))
-                            .arg(uint8_t(fw.params[5]), 2, 16, QLatin1Char('0'));
+                            .arg(uint8_t(fw.params[5]), 2, 16, QLatin1Char('0'))
+                            .arg((uint8_t(fw.params[6]) << 8) | uint8_t(fw.params[7]), 4, 16, QLatin1Char('0'));
+        break;
     }
     const Reply dpis = call(slot, AdjustableDpi, 1, QByteArray(1, '\0'));
     if (dpis.ok)
@@ -234,6 +240,8 @@ void LogitechDevice::readState(Slot &slot)
     }
     if (const Reply r = call(slot, HiresWheel, 1); r.ok)
         slot.hiresFlags = uint8_t(r.params[0]);
+    if (const Reply r = call(slot, ThumbWheel, 1); r.ok)
+        slot.thumbInvert = uint8_t(r.params[1]) & 1;
     if (const Reply r = call(slot, NewFnInversion, 0); r.ok)
         slot.fnInversion = uint8_t(r.params[0]) & 1;
     else if (const Reply r2 = call(slot, FnInversion, 0); r2.ok)
@@ -292,7 +300,7 @@ void LogitechDevice::render()
                                          : _node.bus == 0x05 ? QStringLiteral("bluetooth")
                                                              : QStringLiteral("usb");
         e[QStringLiteral("online")] = slot.online;
-        e[QStringLiteral("untested")] = true;
+        e[QStringLiteral("untested")] = !slot.name.startsWith(QLatin1String("MX Master 4"));
         if (slot.battery >= 0) {
             e[QStringLiteral("battery")] = slot.battery;
             e[QStringLiteral("charging")] = slot.charging;
@@ -334,12 +342,12 @@ void LogitechDevice::render()
                 controls.append(slider(QStringLiteral("smartShiftThreshold"), QStringLiteral("buttons"),
                                        QStringLiteral("SmartShift sensitivity"), std::clamp(slot.autoDisengage, 1, 50), 1, 50, 1));
         }
-        if (slot.hiresFlags >= 0) {
-            controls.append(toggle(QStringLiteral("hiresScroll"), QStringLiteral("buttons"), QStringLiteral("High-resolution scrolling"),
-                                   slot.hiresFlags & 0x02));
+        if (slot.hiresFlags >= 0)
             controls.append(toggle(QStringLiteral("invertScroll"), QStringLiteral("buttons"), QStringLiteral("Natural scrolling"),
                                    slot.hiresFlags & 0x04));
-        }
+        if (slot.thumbInvert >= 0)
+            controls.append(toggle(QStringLiteral("thumbInvert"), QStringLiteral("buttons"), QStringLiteral("Invert thumb wheel"),
+                                   slot.thumbInvert == 1));
         if (slot.fnInversion >= 0)
             controls.append(toggle(QStringLiteral("fnInversion"), QStringLiteral("keys"),
                                    QStringLiteral("Media keys without Fn"), slot.fnInversion == 1));
@@ -404,11 +412,13 @@ QString LogitechDevice::applyChange(Slot &slot, const QJsonObject &change)
         if (!(enhanced ? call(slot, SmartShiftEnhanced, 2, params) : call(slot, SmartShift, 1, params)).ok)
             return failed;
     }
-    if ((change.contains(QStringLiteral("hiresScroll")) || change.contains(QStringLiteral("invertScroll")))
-        && slot.hiresFlags >= 0) {
+    if (change.contains(QStringLiteral("thumbInvert"))) {
+        const char v = change.value(QStringLiteral("thumbInvert")).toBool() ? 1 : 0;
+        if (!call(slot, ThumbWheel, 2, bytes({0, v})).ok)
+            return failed;
+    }
+    if (change.contains(QStringLiteral("invertScroll")) && slot.hiresFlags >= 0) {
         uint8_t flags = uint8_t(slot.hiresFlags & 0x07);
-        if (change.contains(QStringLiteral("hiresScroll")))
-            flags = change.value(QStringLiteral("hiresScroll")).toBool() ? (flags | 0x02) : (flags & ~0x02);
         if (change.contains(QStringLiteral("invertScroll")))
             flags = change.value(QStringLiteral("invertScroll")).toBool() ? (flags | 0x04) : (flags & ~0x04);
         if (!call(slot, HiresWheel, 2, QByteArray(1, char(flags))).ok)

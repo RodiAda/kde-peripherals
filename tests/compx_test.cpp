@@ -58,6 +58,7 @@ int main()
     }
     check(pollingRateFromCode(0x20) == 4000 && pollingRateCode(8000) == 0x40, "polling codes");
     check(unpair(bytes({0x20, 0x35}), 0) == 0x20 && !unpair(bytes({0x20, 0x36}), 0), "pair crc");
+    check(pair(1) == bytes({0x01, 0x54}) && pair(0) == bytes({0x00, 0x55}) && pair(0xFB) == bytes({0xFB, 0x5A}), "pair bytes");
 
     if (failures == 0)
         std::printf("compx: all tests passed\n");

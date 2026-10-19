@@ -50,6 +50,7 @@ private:
         int autoDisengage = 0;
         int autoDisengageDefault = 0;
         int hiresFlags = -1;
+        int thumbInvert = -1;
         int hosts = 0;
         int currentHost = -1;
         int fnInversion = -1;

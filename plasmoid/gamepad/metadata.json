@@ -14,7 +14,7 @@
         "License": "MIT",
         "Name": "Gamepad",
         "Name[ru]": "Геймпад",
-        "Version": "0.1.0",
+        "Version": "0.1.1",
         "Website": "https://github.com/RodiAda/kde-peripherals"
     },
     "X-Plasma-API-Minimum-Version": "6.0",

@@ -31,7 +31,10 @@ bool checksumValid(const QByteArray &report)
 
 QByteArray pair(uint8_t v)
 {
-    return QByteArray{char(v), char(pairCrc(v))};
+    QByteArray b(2, '\0');
+    b[0] = char(v);
+    b[1] = char(pairCrc(v));
+    return b;
 }
 
 std::optional<uint8_t> unpair(const QByteArray &block, int offset)
