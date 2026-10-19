@@ -21,6 +21,7 @@ enum Feature : uint16_t {
     BatteryVoltage = 0x1001,
     UnifiedBattery = 0x1004,
     ChangeHost = 0x1814,
+    ReprogControls = 0x1B04,
     SmartShift = 0x2110,
     SmartShiftEnhanced = 0x2111,
     HiresWheel = 0x2121,

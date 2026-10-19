@@ -54,6 +54,13 @@ private:
         int hosts = 0;
         int currentHost = -1;
         int fnInversion = -1;
+        QList<uint16_t> buttons;
+        QHash<uint16_t, QString> actions;
+        QList<uint16_t> pressed;
+        QHash<QString, QString> gestures;
+        bool gestureActive = false;
+        int gestureDx = 0;
+        int gestureDy = 0;
         QString error;
     };
 
@@ -65,6 +72,13 @@ private:
     void readBattery(Slot &slot);
     void readState(Slot &slot);
     void handleNotification(const QByteArray &report);
+    void loadButtons(Slot &slot);
+    void applyDiverts(Slot &slot);
+    void handleButtons(Slot &slot, const QByteArray &report);
+    void handleRawXY(Slot &slot, const QByteArray &report);
+    void finishGesture(Slot &slot);
+    void runAction(const QString &id);
+    QString settingsGroup(const Slot &slot) const;
     void tick();
     void render();
     QString applyChange(Slot &slot, const QJsonObject &change);
@@ -75,6 +89,7 @@ private:
     QTimer _timer{this};
     QElapsedTimer _sinceBattery;
     bool _receiver = false;
+    uint8_t _directIndex = hidpp::DirectIndex;
     QMap<uint8_t, Slot> _slots;
     QList<uint8_t> _reprobe;
     int _failures = 0;

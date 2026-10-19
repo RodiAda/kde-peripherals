@@ -13,6 +13,7 @@ struct HidrawInfo {
     QString name;
     QString phys;
     QString uniq;
+    QString driver;
     uint16_t bus = 0;
     uint16_t vendor = 0;
     uint16_t product = 0;
@@ -22,6 +23,7 @@ struct HidrawInfo {
     bool hasReportId(uint8_t id) const;
     bool hasUsagePage(uint16_t page) const;
     QString physicalKey() const;
+    int receiverIndex() const;
 };
 
 QList<HidrawInfo> enumerateHidraw();

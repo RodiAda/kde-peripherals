@@ -22,7 +22,7 @@ PlasmoidItem {
     readonly property var devices: daemonUp ? parseJson(devicesJson, []).filter(d => d.kind === kind) : []
     property string selectedId: ""
     readonly property var current: devices.find(d => d.id === selectedId) || devices[0] || null
-    readonly property var sections: ["performance", "sensor", "buttons", "lighting", "keys", "power", "other"]
+    readonly property var sections: ["performance", "sensor", "buttons", "keys", "gestures", "lighting", "power", "other"]
     readonly property var currentSections: current && current.controls
         ? sections.filter(s => current.controls.some(c => (c.section || "other") === s)) : []
     property string currentSection: ""
@@ -142,7 +142,8 @@ PlasmoidItem {
         case "sensor": return i18n("Sensor")
         case "buttons": return i18n("Buttons")
         case "lighting": return i18n("Lighting")
-        case "keys": return i18n("Keys")
+        case "keys": return root.kind === "mouse" ? i18n("Actions") : i18n("Keys")
+        case "gestures": return i18n("Gestures")
         case "power": return i18n("Power")
         }
         return i18n("Other")
@@ -240,6 +241,36 @@ PlasmoidItem {
         case "SmartShift": return i18n("SmartShift")
         case "SmartShift sensitivity": return i18n("SmartShift sensitivity")
         case "Invert thumb wheel": return i18n("Invert thumb wheel")
+        case "Gesture button": return i18n("Gesture button")
+        case "Actions button": return i18n("Actions button")
+        case "Mode shift button": return i18n("Mode shift button")
+        case "Default": return i18n("Default")
+        case "Overview": return i18n("Overview")
+        case "Desktop grid": return i18n("Desktop grid")
+        case "Windows of the current desktop": return i18n("Windows of the current desktop")
+        case "All windows": return i18n("All windows")
+        case "Show desktop": return i18n("Show desktop")
+        case "Application launcher": return i18n("Application launcher")
+        case "KRunner": return i18n("KRunner")
+        case "Screenshot of a region": return i18n("Screenshot of a region")
+        case "Close window": return i18n("Close window")
+        case "Gestures": return i18n("Gestures")
+        case "Do nothing": return i18n("Do nothing")
+        case "Previous desktop": return i18n("Previous desktop")
+        case "Next desktop": return i18n("Next desktop")
+        case "Maximize window": return i18n("Maximize window")
+        case "Minimize window": return i18n("Minimize window")
+        case "Play/pause": return i18n("Play/pause")
+        case "Next track": return i18n("Next track")
+        case "Previous track": return i18n("Previous track")
+        case "Volume up": return i18n("Volume up")
+        case "Volume down": return i18n("Volume down")
+        case "Mute": return i18n("Mute")
+        case "Gesture up": return i18n("Gesture up")
+        case "Gesture down": return i18n("Gesture down")
+        case "Gesture left": return i18n("Gesture left")
+        case "Gesture right": return i18n("Gesture right")
+        case "Gesture click": return i18n("Press without moving")
         case "Natural scrolling": return i18n("Natural scrolling")
         case "Media keys without Fn": return i18n("Media keys without Fn")
         case "Easy-Switch channel": return i18n("Easy-Switch channel")

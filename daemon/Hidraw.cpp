@@ -69,8 +69,16 @@ QString HidrawInfo::physicalKey() const
     if (!uniq.isEmpty())
         return uniq.toLower();
     QString p = phys;
-    p.remove(QRegularExpression(QStringLiteral("/input\\d+$")));
+    p.remove(QRegularExpression(QStringLiteral("/input\\d+(:\\d)?$")));
+    if (receiverIndex() > 0)
+        p += QStringLiteral(":%1").arg(receiverIndex());
     return p;
+}
+
+int HidrawInfo::receiverIndex() const
+{
+    const auto m = QRegularExpression(QStringLiteral(":(\\d)$")).match(phys);
+    return m.hasMatch() ? m.captured(1).toInt() : -1;
 }
 
 QList<HidrawInfo> enumerateHidraw()
@@ -107,6 +115,7 @@ QList<HidrawInfo> enumerateHidraw()
         if (m.hasMatch())
             info.interface = m.captured(1).toInt();
         info.descriptor = readFile(info.sysPath + QStringLiteral("/report_descriptor"));
+        info.driver = QFileInfo(info.sysPath + QStringLiteral("/driver")).canonicalFilePath().section(QLatin1Char('/'), -1);
         result.append(info);
     }
     return result;

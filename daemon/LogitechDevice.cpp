@@ -1,6 +1,12 @@
 #include "LogitechDevice.h"
 
+#include <QDBusConnection>
+#include <QDBusMessage>
+#include <QDBusPendingCall>
 #include <QJsonDocument>
+#include <QSettings>
+
+#include <cstdlib>
 
 #include "Log.h"
 
@@ -23,6 +29,66 @@ QByteArray bytes(std::initializer_list<int> values)
     return b;
 }
 
+struct ButtonInfo {
+    uint16_t cid;
+    const char *label;
+};
+
+constexpr ButtonInfo KnownButtons[] = {
+    {0x00C3, "Gesture button"},
+    {0x01A0, "Actions button"},
+    {0x00C4, "Mode shift button"},
+    {0x0052, "Middle button"},
+    {0x0053, "Back button"},
+    {0x0056, "Forward button"},
+};
+
+constexpr uint16_t GestureButton = 0x00C3;
+constexpr int GestureThreshold = 150;
+const char *const GestureDirections[] = {"up", "down", "left", "right", "click"};
+const char *const GestureLabels[] = {"Gesture up", "Gesture down", "Gesture left", "Gesture right", "Gesture click"};
+
+struct ButtonAction {
+    const char *id;
+    const char *label;
+    const char *component;
+    const char *shortcut;
+};
+
+constexpr ButtonAction ButtonActions[] = {
+    {"default", "Default", nullptr, nullptr},
+    {"gestures", "Gestures", nullptr, nullptr},
+    {"none", "Do nothing", nullptr, nullptr},
+    {"overview", "Overview", "kwin", "Overview"},
+    {"grid", "Desktop grid", "kwin", "Grid View"},
+    {"expose", "Windows of the current desktop", "kwin", "Expose"},
+    {"exposeAll", "All windows", "kwin", "ExposeAll"},
+    {"desktop", "Show desktop", "kwin", "Show Desktop"},
+    {"desktopLeft", "Previous desktop", "kwin", "Switch One Desktop to the Left"},
+    {"desktopRight", "Next desktop", "kwin", "Switch One Desktop to the Right"},
+    {"maximize", "Maximize window", "kwin", "Window Maximize"},
+    {"minimize", "Minimize window", "kwin", "Window Minimize"},
+    {"close", "Close window", "kwin", "Window Close"},
+    {"launcher", "Application launcher", "plasmashell", "activate application launcher"},
+    {"krunner", "KRunner", "org_kde_krunner_desktop", "_launch"},
+    {"screenshot", "Screenshot of a region", "org_kde_spectacle_desktop", "RectangularRegionScreenShot"},
+    {"playPause", "Play/pause", "mediacontrol", "playpausemedia"},
+    {"nextTrack", "Next track", "mediacontrol", "nextmedia"},
+    {"previousTrack", "Previous track", "mediacontrol", "previousmedia"},
+    {"volumeUp", "Volume up", "kmix", "increase_volume"},
+    {"volumeDown", "Volume down", "kmix", "decrease_volume"},
+    {"mute", "Mute", "kmix", "mute"},
+};
+
+const ButtonAction *findAction(const QString &id)
+{
+    for (const ButtonAction &a : ButtonActions) {
+        if (id == QLatin1String(a.id))
+            return &a;
+    }
+    return nullptr;
+}
+
 QString kindFromType(int type)
 {
     switch (type) {
@@ -37,7 +103,7 @@ QString kindFromType(int type)
 
 bool LogitechDevice::matches(const HidrawInfo &info)
 {
-    if (info.vendor != 0x046D || !info.hasReportId(LongReport))
+    if (info.vendor != 0x046D || !info.hasReportId(LongReport) || info.driver == QLatin1String("logitech-djreceiver"))
         return false;
     return info.hasUsagePage(0xFF00) || info.hasUsagePage(0xFF43);
 }
@@ -50,6 +116,8 @@ void LogitechDevice::start()
         return;
     }
     _receiver = _node.bus == 0x03 && ReceiverProducts.contains(_node.product);
+    if (_node.receiverIndex() > 0)
+        _directIndex = uint8_t(_node.receiverIndex());
     _notifier = std::make_unique<QSocketNotifier>(_dev.fd(), QSocketNotifier::Read);
     connect(_notifier.get(), &QSocketNotifier::activated, this, [this] {
         while (auto r = _dev.read(0))
@@ -64,7 +132,7 @@ void LogitechDevice::start()
         for (uint8_t i = 1; i <= 6; ++i)
             probe(i);
     } else {
-        probe(DirectIndex);
+        probe(_directIndex);
     }
     _sinceBattery.start();
     render();
@@ -77,6 +145,126 @@ void LogitechDevice::handleNotification(const QByteArray &report)
     const uint8_t index = uint8_t(report[1]);
     if (uint8_t(report[2]) == 0x41 && !_reprobe.contains(index))
         _reprobe.append(index);
+    auto it = _slots.find(index);
+    if (it == _slots.end())
+        return;
+    const auto reprog = it->features.constFind(ReprogControls);
+    if (reprog == it->features.cend() || !*reprog || uint8_t(report[2]) != *reprog)
+        return;
+    if (uint8_t(report[3]) == 0x00)
+        handleButtons(*it, report);
+    else if (uint8_t(report[3]) == 0x10)
+        handleRawXY(*it, report);
+}
+
+void LogitechDevice::runAction(const QString &id)
+{
+    const ButtonAction *action = findAction(id);
+    if (!action || !action->component)
+        return;
+    auto msg = QDBusMessage::createMethodCall(QStringLiteral("org.kde.kglobalaccel"),
+                                              QStringLiteral("/component/") + QLatin1String(action->component),
+                                              QStringLiteral("org.kde.kglobalaccel.Component"),
+                                              QStringLiteral("invokeShortcut"));
+    msg << QString::fromLatin1(action->shortcut);
+    QDBusConnection::sessionBus().asyncCall(msg);
+}
+
+void LogitechDevice::handleRawXY(Slot &slot, const QByteArray &report)
+{
+    if (!slot.gestureActive || report.size() < 8)
+        return;
+    slot.gestureDx += int16_t((uint8_t(report[4]) << 8) | uint8_t(report[5]));
+    slot.gestureDy += int16_t((uint8_t(report[6]) << 8) | uint8_t(report[7]));
+}
+
+void LogitechDevice::finishGesture(Slot &slot)
+{
+    slot.gestureActive = false;
+    const int dx = slot.gestureDx;
+    const int dy = slot.gestureDy;
+    QString direction;
+    if (std::abs(dx) < GestureThreshold && std::abs(dy) < GestureThreshold)
+        direction = QStringLiteral("click");
+    else if (std::abs(dx) > std::abs(dy))
+        direction = dx > 0 ? QStringLiteral("right") : QStringLiteral("left");
+    else
+        direction = dy > 0 ? QStringLiteral("down") : QStringLiteral("up");
+    runAction(slot.gestures.value(direction));
+}
+
+QString LogitechDevice::settingsGroup(const Slot &slot) const
+{
+    return QStringLiteral("logitech-") + QString::fromLatin1(slot.name.toUtf8().toHex());
+}
+
+void LogitechDevice::loadButtons(Slot &slot)
+{
+    slot.buttons.clear();
+    const Reply count = call(slot, ReprogControls, 0);
+    for (int i = 0; count.ok && i < uint8_t(count.params[0]); ++i) {
+        const Reply info = call(slot, ReprogControls, 1, QByteArray(1, char(i)));
+        if (!info.ok || !(uint8_t(info.params[4]) & 0x20))
+            continue;
+        const uint16_t cid = uint16_t((uint8_t(info.params[0]) << 8) | uint8_t(info.params[1]));
+        for (const ButtonInfo &b : KnownButtons) {
+            if (b.cid == cid)
+                slot.buttons.append(cid);
+        }
+    }
+    QSettings settings;
+    settings.beginGroup(settingsGroup(slot));
+    for (uint16_t cid : std::as_const(slot.buttons)) {
+        const QString action = settings.value(QStringLiteral("button-%1").arg(cid, 4, 16, QLatin1Char('0'))).toString();
+        if (findAction(action) && action != QLatin1String("default")
+            && (action != QLatin1String("gestures") || cid == GestureButton))
+            slot.actions.insert(cid, action);
+    }
+    slot.gestures = {{QStringLiteral("up"), QStringLiteral("overview")},
+                     {QStringLiteral("down"), QStringLiteral("desktop")},
+                     {QStringLiteral("left"), QStringLiteral("desktopLeft")},
+                     {QStringLiteral("right"), QStringLiteral("desktopRight")},
+                     {QStringLiteral("click"), QStringLiteral("overview")}};
+    for (const char *direction : GestureDirections) {
+        const QString action = settings.value(QStringLiteral("gesture-%1").arg(QLatin1String(direction))).toString();
+        if (findAction(action))
+            slot.gestures.insert(QString::fromLatin1(direction), action);
+    }
+}
+
+void LogitechDevice::applyDiverts(Slot &slot)
+{
+    for (uint16_t cid : std::as_const(slot.buttons)) {
+        uint8_t flags = slot.actions.contains(cid) ? 0x03 : 0x02;
+        if (cid == GestureButton)
+            flags |= slot.actions.value(cid) == QLatin1String("gestures") ? 0x30 : 0x20;
+        call(slot, ReprogControls, 3, bytes({cid >> 8, cid, flags, 0, 0}));
+    }
+}
+
+void LogitechDevice::handleButtons(Slot &slot, const QByteArray &report)
+{
+    QList<uint16_t> now;
+    for (int i = 4; i + 1 < report.size() && i < 12; i += 2) {
+        const uint16_t cid = uint16_t((uint8_t(report[i]) << 8) | uint8_t(report[i + 1]));
+        if (cid)
+            now.append(cid);
+    }
+    const bool gestureMode = slot.actions.value(GestureButton) == QLatin1String("gestures");
+    for (uint16_t cid : std::as_const(now)) {
+        if (slot.pressed.contains(cid))
+            continue;
+        if (cid == GestureButton && gestureMode) {
+            slot.gestureActive = true;
+            slot.gestureDx = 0;
+            slot.gestureDy = 0;
+            continue;
+        }
+        runAction(slot.actions.value(cid));
+    }
+    if (gestureMode && slot.gestureActive && !now.contains(GestureButton))
+        finishGesture(slot);
+    slot.pressed = now;
 }
 
 LogitechDevice::Reply LogitechDevice::transact(uint8_t device, uint8_t featureIndex, uint8_t function,
@@ -150,9 +338,15 @@ void LogitechDevice::probe(uint8_t index)
         it = _slots.insert(index, Slot{});
         it->index = index;
     }
+    const bool wasOnline = it->online;
     it->online = true;
-    if (!it->loaded)
+    if (!it->loaded) {
         load(*it);
+        loadButtons(*it);
+        applyDiverts(*it);
+    } else if (!wasOnline) {
+        applyDiverts(*it);
+    }
     readState(*it);
 }
 
@@ -265,9 +459,9 @@ void LogitechDevice::tick()
                     readBattery(*it);
             }
         } else {
-            auto it = _slots.find(DirectIndex);
+            auto it = _slots.find(_directIndex);
             if (it == _slots.end() || !it->online)
-                probe(DirectIndex);
+                probe(_directIndex);
             else
                 readBattery(*it);
         }
@@ -296,7 +490,7 @@ void LogitechDevice::render()
         e[QStringLiteral("kind")] = kindFromType(slot.type);
         e[QStringLiteral("vendor")] = QStringLiteral("Logitech");
         e[QStringLiteral("name")] = slot.name;
-        e[QStringLiteral("transport")] = _receiver ? QStringLiteral("dongle")
+        e[QStringLiteral("transport")] = _receiver || _node.receiverIndex() > 0 ? QStringLiteral("dongle")
                                          : _node.bus == 0x05 ? QStringLiteral("bluetooth")
                                                              : QStringLiteral("usb");
         e[QStringLiteral("online")] = slot.online;
@@ -351,6 +545,36 @@ void LogitechDevice::render()
         if (slot.fnInversion >= 0)
             controls.append(toggle(QStringLiteral("fnInversion"), QStringLiteral("keys"),
                                    QStringLiteral("Media keys without Fn"), slot.fnInversion == 1));
+        for (uint16_t cid : slot.buttons) {
+            QJsonArray options;
+            for (const ButtonAction &a : ButtonActions) {
+                if (QLatin1String(a.id) == QLatin1String("gestures") && cid != GestureButton)
+                    continue;
+                options.append(option(QString::fromLatin1(a.id), QString::fromLatin1(a.label)));
+            }
+            const char *label = "";
+            for (const ButtonInfo &b : KnownButtons) {
+                if (b.cid == cid)
+                    label = b.label;
+            }
+            controls.append(choice(QStringLiteral("button.%1").arg(cid, 4, 16, QLatin1Char('0')), QStringLiteral("keys"),
+                                   QString::fromLatin1(label), slot.actions.value(cid, QStringLiteral("default")), options));
+        }
+        if (slot.actions.value(GestureButton) == QLatin1String("gestures")) {
+            QJsonArray options;
+            for (const ButtonAction &a : ButtonActions) {
+                const QLatin1String id(a.id);
+                if (id == QLatin1String("default") || id == QLatin1String("gestures"))
+                    continue;
+                options.append(option(QString::fromLatin1(a.id), QString::fromLatin1(a.label)));
+            }
+            for (size_t i = 0; i < std::size(GestureDirections); ++i) {
+                const QString direction = QString::fromLatin1(GestureDirections[i]);
+                controls.append(choice(QStringLiteral("gesture.") + direction, QStringLiteral("gestures"),
+                                       QString::fromLatin1(GestureLabels[i]), slot.gestures.value(direction),
+                                       options));
+            }
+        }
         if (slot.hosts > 1 && slot.currentHost >= 0) {
             QJsonArray options;
             for (int h = 0; h < slot.hosts; ++h)
@@ -431,6 +655,37 @@ QString LogitechDevice::applyChange(Slot &slot, const QJsonObject &change)
         if (!ok)
             return failed;
     }
+    bool buttonsChanged = false;
+    for (uint16_t cid : std::as_const(slot.buttons)) {
+        const QString key = QStringLiteral("button.%1").arg(cid, 4, 16, QLatin1Char('0'));
+        if (!change.contains(key))
+            continue;
+        const QString action = change.value(key).toString();
+        if (!findAction(action) || (action == QLatin1String("gestures") && cid != GestureButton))
+            return QStringLiteral("Invalid button action");
+        if (action == QLatin1String("default"))
+            slot.actions.remove(cid);
+        else
+            slot.actions.insert(cid, action);
+        QSettings settings;
+        settings.beginGroup(settingsGroup(slot));
+        settings.setValue(QStringLiteral("button-%1").arg(cid, 4, 16, QLatin1Char('0')), action);
+        buttonsChanged = true;
+    }
+    for (const char *direction : GestureDirections) {
+        const QString key = QStringLiteral("gesture.") + QLatin1String(direction);
+        if (!change.contains(key))
+            continue;
+        const QString action = change.value(key).toString();
+        if (!findAction(action) || action == QLatin1String("gestures") || action == QLatin1String("default"))
+            return QStringLiteral("Invalid button action");
+        slot.gestures.insert(QString::fromLatin1(direction), action);
+        QSettings settings;
+        settings.beginGroup(settingsGroup(slot));
+        settings.setValue(QStringLiteral("gesture-%1").arg(QLatin1String(direction)), action);
+    }
+    if (buttonsChanged)
+        applyDiverts(slot);
     if (change.contains(QStringLiteral("easySwitch"))) {
         const int host = change.value(QStringLiteral("easySwitch")).toInt();
         if (host < 0 || host >= slot.hosts)

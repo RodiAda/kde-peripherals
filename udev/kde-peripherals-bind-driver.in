@@ -1,0 +1,42 @@
+#!/bin/sh
+set -u
+
+name=$1
+dev=/sys/bus/hid/devices/$name
+[ -d "$dev" ] || exit 0
+current=$(basename "$(readlink -f "$dev/driver")")
+[ "$current" = hid-generic ] || exit 0
+
+id=${name%%.*}
+bus=${id%%:*}
+rest=${id#*:}
+vendor=${rest%%:*}
+product=${rest#*:}
+descriptor=$(od -An -tx1 -v "$dev/report_descriptor" | tr -d ' \n')
+
+module=
+driver=
+case "$bus:$vendor" in
+    0005:046D)
+        case "$descriptor" in
+            *0643ff*8511*|*0600ff*8511*)
+                module=hid-logitech-hidpp
+                driver=logitech-hidpp-device
+                ;;
+        esac
+        ;;
+esac
+[ -n "$driver" ] || exit 0
+
+modprobe -q "$module" || exit 0
+target=/sys/bus/hid/drivers/$driver
+[ -d "$target" ] || exit 0
+
+echo "$bus $vendor $product 0" > "$target/new_id" 2>/dev/null
+echo "$name" > /sys/bus/hid/drivers/hid-generic/unbind || exit 0
+if ! echo "$name" > "$target/bind" 2>/dev/null; then
+    echo "$name" > /sys/bus/hid/drivers/hid-generic/bind
+    logger -t kde-peripherals "could not bind $name to $driver, kept hid-generic"
+    exit 0
+fi
+logger -t kde-peripherals "bound $name to $driver"

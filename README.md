@@ -13,7 +13,7 @@ Windows or web software.
 | MAD R, MAD R Major, MAD R Major+ and other ATK/Compx mice | 2.4 GHz dongle | same protocol | untested |
 | Royal Kludge RK96 RGB (`258a:0089`) | USB cable | lighting effect, brightness, speed, colour, rainbow mode, lighting timeout | commands accepted on real hardware; colour order not confirmed yet |
 | Xbox, Steam Controller, DualSense and other gamepads | Bluetooth, receiver, USB | battery and connection state from the kernel (power_supply) or BlueZ, disconnect button for Bluetooth controllers | Xbox Wireless Controller over Bluetooth: untested |
-| Logitech HID++ 2.0 devices | Unifying, Bolt, Lightspeed receivers, Bluetooth, USB | battery, firmware, DPI, polling rate, SmartShift, wheel mode, natural scrolling, thumb wheel direction, Fn inversion, Easy-Switch channel | MX Master 4 over Bluetooth: tested; other models untested |
+| Logitech HID++ 2.0 devices | Unifying, Bolt, Lightspeed receivers, Bluetooth, USB | battery, firmware, DPI, polling rate, SmartShift, wheel mode, natural scrolling, thumb wheel direction, Fn inversion, Easy-Switch channel, KDE actions on the gesture, actions, mode shift, middle, back and forward buttons, gestures | MX Master 4 over Bluetooth: tested; receivers and other models untested |
 
 Devices marked untested show a banner in the widget with a link to report how they work.
 
@@ -27,6 +27,19 @@ Devices marked untested show a banner in the widget with a link to report how th
   widget shows the last values set from it; changes made with Fn shortcuts on the keyboard are
   not visible. Only the wired connection carries configuration commands; over 2.4 GHz and
   Bluetooth the keyboard cannot be configured.
+* **Logitech buttons and gestures**: a button with an action assigned is diverted over HID++ and the
+  daemon runs the matching KDE global shortcut (Overview, desktop grid, show desktop, switching desktops,
+  window actions, application launcher, KRunner, screenshots, media and volume). In *Gestures* mode the
+  gesture button also diverts mouse movement while held: moving up, down, left or right, or pressing
+  without moving, runs one of five actions. Diverting is not stored in the mouse, so the daemon applies it
+  again after every reconnect; with the daemon stopped the buttons return to their defaults.
+* **Logitech receivers**: with the kernel's `hid-logitech-dj` driver every paired device gets its own node
+  and is handled like a directly connected one; without it the daemon talks to the receiver slots itself.
+* **Kernel driver**: Bluetooth Logitech mice that the running kernel does not know yet end up on
+  `hid-generic`, which ignores HID++ features such as high-resolution scrolling. The udev rule runs
+  `kde-peripherals-bind-driver`, which loads `hid-logitech-hidpp`, registers the device ID and rebinds the
+  mouse to it, falling back to `hid-generic` if that fails. After a kernel update the new modules are
+  only usable after a reboot.
 * **Logitech**: only features that cannot break input are exposed. Scroll events are never
   diverted to HID++, buttons are not remapped, and high-resolution scrolling is left alone: unless the
   kernel's `hid-logitech-hidpp` driver handles the device, turning it on makes the wheel scroll several

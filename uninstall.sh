@@ -11,5 +11,5 @@ else
         ~/.local/share/dbus-1/services/io.github.rodiada.Peripherals.service
     rm -rfv ~/.local/share/plasma/plasmoids/io.github.rodiada.peripherals.{mouse,keyboard,gamepad}
 fi
-sudo rm -fv /etc/udev/rules.d/70-kde-peripherals.rules
+sudo rm -fv /etc/udev/rules.d/70-kde-peripherals.rules /usr/local/libexec/kde-peripherals-bind-driver
 systemctl --user daemon-reload

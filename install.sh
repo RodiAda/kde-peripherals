@@ -7,7 +7,9 @@ cmake --build build-user
 cmake --install build-user
 
 echo "Installing the udev rule (needs root) so the daemon can talk to the devices:"
-sudo install -Dm644 udev/70-kde-peripherals.rules /etc/udev/rules.d/70-kde-peripherals.rules
+sudo install -Dm755 build-user/kde-peripherals-bind-driver /usr/local/libexec/kde-peripherals-bind-driver
+sed 's|'"$HOME"'/.local/libexec/kde-peripherals-bind-driver|/usr/local/libexec/kde-peripherals-bind-driver|' build-user/70-kde-peripherals.rules \
+    | sudo tee /etc/udev/rules.d/70-kde-peripherals.rules >/dev/null
 sudo udevadm control --reload
 sudo udevadm trigger --subsystem-match=hidraw
 
