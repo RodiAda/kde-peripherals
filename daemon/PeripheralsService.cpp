@@ -114,6 +114,7 @@ void PeripheralsService::publishState()
     if (json == _devices)
         return;
     _devices = json;
+    _batteries.update(ordered);
     auto signal = QDBusMessage::createSignal(QString::fromLatin1(Path), QStringLiteral("org.freedesktop.DBus.Properties"),
                                              QStringLiteral("PropertiesChanged"));
     signal << QString::fromLatin1(Service) << QVariantMap{{QStringLiteral("Devices"), _devices}} << QStringList();

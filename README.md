@@ -27,6 +27,13 @@ Devices marked untested show a banner in the widget with a link to report how th
   widget shows the last values set from it; changes made with Fn shortcuts on the keyboard are
   not visible. Only the wired connection carries configuration commands; over 2.4 GHz and
   Bluetooth the keyboard cannot be configured.
+* **Battery in Power and Battery**: Plasma lists batteries known to UPower, which only reads BlueZ and kernel
+  power supplies. For devices whose battery only the daemon knows (MAD R+, Logitech devices without the
+  kernel driver) the system service `peripherals-batteryd` creates a virtual HID device through `/dev/uhid`
+  with a fixed mouse or keyboard descriptor that never sends input, plus a battery report. The kernel turns
+  it into a power supply and UPower shows it next to other devices. The service only accepts
+  `Set(id, name, kind, percent, charging)` and `Remove(id)` over the system bus, removes devices when their
+  owner disconnects, allows eight per caller and runs sandboxed with access to `/dev/uhid` only.
 * **RK96 music visualization**: the daemon records the default output with `pw-cat` (PipeWire) and streams
   per-key colours with the keyboard's non-saving command `06 00` at 20 frames per second. The keyboard drops
   back to its own effect about two seconds after the last frame and rewrites its settings in flash at that

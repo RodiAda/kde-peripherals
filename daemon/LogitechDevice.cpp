@@ -495,6 +495,7 @@ void LogitechDevice::render()
                                                              : QStringLiteral("usb");
         e[QStringLiteral("online")] = slot.online;
         e[QStringLiteral("untested")] = !slot.name.startsWith(QLatin1String("MX Master 4"));
+        e[QStringLiteral("bridgeBattery")] = _node.driver != QLatin1String("logitech-hidpp-device");
         if (slot.battery >= 0) {
             e[QStringLiteral("battery")] = slot.battery;
             e[QStringLiteral("charging")] = slot.charging;

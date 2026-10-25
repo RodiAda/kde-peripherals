@@ -302,6 +302,7 @@ QJsonObject CompxMouse::entryBase() const
     e[QStringLiteral("transport")] = QStringLiteral("dongle");
     e[QStringLiteral("online")] = _online;
     e[QStringLiteral("untested")] = _cid != 0 && (!_model || _model->mid != 54);
+    e[QStringLiteral("bridgeBattery")] = _cid != 0;
     if (_battery >= 0) {
         e[QStringLiteral("battery")] = _battery;
         e[QStringLiteral("charging")] = _charging;

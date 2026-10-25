@@ -8,6 +8,8 @@
 #include <QThread>
 #include <QTimer>
 
+#include "BatteryBridge.h"
+
 class Device;
 
 class PeripheralsService : public QObject, protected QDBusContext
@@ -46,4 +48,5 @@ private:
     QTimer _rescan;
     QTimer _debounce;
     QString _devices = QStringLiteral("[]");
+    BatteryBridge _batteries;
 };
