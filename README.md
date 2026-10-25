@@ -34,6 +34,9 @@ Devices marked untested show a banner in the widget with a link to report how th
   it into a power supply and UPower shows it next to other devices. The service only accepts
   `Set(id, name, kind, percent, charging)` and `Remove(id)` over the system bus, removes devices when their
   owner disconnects, allows eight per caller and runs sandboxed with access to `/dev/uhid` only.
+* **RK96 speed levels**: stock firmware has five speeds. Setting `speedLevels=9` in the `[rk-0089]` group of
+  `~/.config/io.github.rodiada/peripheralsd.conf` widens the slider to nine for keyboards running a firmware
+  patched for nine levels; with stock firmware speeds above five would produce garbage.
 * **RK96 music visualization**: the daemon records the default output with `pw-cat` (PipeWire) and streams
   per-key colours with the keyboard's non-saving command `06 00` at 20 frames per second. The keyboard drops
   back to its own effect about two seconds after the last frame and rewrites its settings in flash at that

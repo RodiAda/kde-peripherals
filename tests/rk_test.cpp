@@ -46,6 +46,12 @@ int main()
     check(multi.size() == 7 && multi[0][1] == 7 && multi[6][2] == 7 && multi[6][11] == 0x11 && multi[6][12] == 0,
           "seven packet framing");
 
+    Lighting fast;
+    fast.speed = 9;
+    check(uint8_t(frame(lightingPayload(fast))[0][7]) == 5, "stock firmware clamps speed to 5");
+    fast.speedLevels = 9;
+    check(uint8_t(frame(lightingPayload(fast))[0][7]) == 9, "patched firmware accepts speed 9");
+
     if (failures == 0)
         std::printf("rk: all tests passed\n");
     return failures ? 1 : 0;

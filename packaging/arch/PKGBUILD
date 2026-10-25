@@ -1,7 +1,7 @@
 # Maintainer: Rodion Adamenok <https://github.com/RodiAda>
 
 pkgname=kde-peripherals
-pkgver=0.4.0
+pkgver=0.5.0
 pkgrel=1
 pkgdesc="KDE Plasma tray widgets for gaming mice, keyboards and gamepads"
 arch=('x86_64' 'aarch64')

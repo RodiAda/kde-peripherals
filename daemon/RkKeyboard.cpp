@@ -124,6 +124,7 @@ void RkKeyboard::load()
     _lighting.blue = uint8_t(c.blue());
     _lighting.random = s.value(QStringLiteral("random"), false).toBool();
     _lighting.sleep = s.value(QStringLiteral("sleep"), _lighting.sleep).toInt();
+    _lighting.speedLevels = s.value(QStringLiteral("speedLevels"), 5).toInt() == 9 ? 9 : 5;
     _music = s.value(QStringLiteral("music"), false).toBool();
     _musicStyle = s.value(QStringLiteral("musicStyle"), 0).toInt();
 }
@@ -183,7 +184,7 @@ void RkKeyboard::render()
                            _lighting.brightness, 0, 5, 1));
     if (info.speed)
         controls.append(slider(QStringLiteral("speed"), QStringLiteral("lighting"), QStringLiteral("Speed"), _lighting.speed,
-                               1, 5, 1));
+                               1, _lighting.speedLevels, 1));
     if (info.random)
         controls.append(toggle(QStringLiteral("random"), QStringLiteral("lighting"), QStringLiteral("Rainbow colors"),
                                _lighting.random));
@@ -233,7 +234,7 @@ void RkKeyboard::apply(const QString &, const QJsonObject &input)
     if (change.contains(QStringLiteral("brightness")))
         next.brightness = std::clamp(change.value(QStringLiteral("brightness")).toInt(), 0, 5);
     if (change.contains(QStringLiteral("speed")))
-        next.speed = std::clamp(change.value(QStringLiteral("speed")).toInt(), 1, 5);
+        next.speed = std::clamp(change.value(QStringLiteral("speed")).toInt(), 1, _lighting.speedLevels);
     if (change.contains(QStringLiteral("random")))
         next.random = change.value(QStringLiteral("random")).toBool();
     if (change.contains(QStringLiteral("sleep")))

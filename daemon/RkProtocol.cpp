@@ -54,7 +54,7 @@ QByteArray lightingPayload(const Lighting &l)
     p[1] = 0x29;
     p[2] = char(std::clamp(l.mode, 1, ModeCount));
     p[3] = 0x01;
-    p[4] = char(std::clamp(l.speed, 1, 5));
+    p[4] = char(std::clamp(l.speed, 1, l.speedLevels == 9 ? 9 : 5));
     p[5] = char(std::clamp(l.brightness, 0, 5));
     const bool useColor = !l.random && modeInfo(l.mode).color;
     p[6] = char(useColor ? l.red : 0);

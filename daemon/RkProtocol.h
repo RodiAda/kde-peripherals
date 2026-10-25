@@ -20,6 +20,7 @@ struct Lighting {
     uint8_t blue = 255;
     bool random = false;
     int sleep = 5;
+    int speedLevels = 5;
 };
 
 struct ModeInfo {
