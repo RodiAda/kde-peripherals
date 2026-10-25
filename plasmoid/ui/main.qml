@@ -22,7 +22,7 @@ PlasmoidItem {
     readonly property var devices: daemonUp ? parseJson(devicesJson, []).filter(d => d.kind === kind) : []
     property string selectedId: ""
     readonly property var current: devices.find(d => d.id === selectedId) || devices[0] || null
-    readonly property var sections: ["performance", "sensor", "buttons", "keys", "gestures", "lighting", "power", "other"]
+    readonly property var sections: ["performance", "sensor", "buttons", "keys", "gestures", "lighting", "music", "power", "other"]
     readonly property var currentSections: current && current.controls
         ? sections.filter(s => current.controls.some(c => (c.section || "other") === s)) : []
     property string currentSection: ""
@@ -144,6 +144,7 @@ PlasmoidItem {
         case "lighting": return i18n("Lighting")
         case "keys": return root.kind === "mouse" ? i18n("Actions") : i18n("Keys")
         case "gestures": return i18n("Gestures")
+        case "music": return i18n("Music")
         case "power": return i18n("Power")
         }
         return i18n("Other")
@@ -255,6 +256,12 @@ PlasmoidItem {
         case "Screenshot of a region": return i18n("Screenshot of a region")
         case "Close window": return i18n("Close window")
         case "Gestures": return i18n("Gestures")
+        case "Music visualization": return i18n("Music visualization")
+        case "Style": return i18n("Style")
+        case "Spectrum": return i18n("Spectrum")
+        case "Rainbow": return i18n("Rainbow")
+        case "Pulse": return i18n("Pulse")
+        case "Audio capture failed": return i18n("Could not capture audio from PipeWire")
         case "Do nothing": return i18n("Do nothing")
         case "Previous desktop": return i18n("Previous desktop")
         case "Next desktop": return i18n("Next desktop")

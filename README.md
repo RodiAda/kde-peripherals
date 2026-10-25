@@ -11,7 +11,7 @@ Windows or web software.
 |---|---|---|---|
 | MADLIONS MAD R+ (Compx chip, `373b:1040` MAD 8K dongle) | 2.4 GHz dongle | battery, voltage, DPI stages, polling rate up to 8 kHz, lift-off distance, sensor mode, motion sync, angle snapping, ripple control, sensor angle, debounce, button mapping, sleep timeout, long-distance mode, DPI indicator | tested |
 | MAD R, MAD R Major, MAD R Major+ and other ATK/Compx mice | 2.4 GHz dongle | same protocol | untested |
-| Royal Kludge RK96 RGB (`258a:0089`) | USB cable | lighting effect, brightness, speed, colour, rainbow mode, lighting timeout | commands accepted on real hardware; colour order not confirmed yet |
+| Royal Kludge RK96 RGB (`258a:0089`) | USB cable | lighting effect, brightness, speed, colour, rainbow mode, lighting timeout, music visualization (spectrum, rainbow, pulse) | tested |
 | Xbox, Steam Controller, DualSense and other gamepads | Bluetooth, receiver, USB | battery and connection state from the kernel (power_supply) or BlueZ, disconnect button for Bluetooth controllers | Xbox Wireless Controller over Bluetooth: untested |
 | Logitech HID++ 2.0 devices | Unifying, Bolt, Lightspeed receivers, Bluetooth, USB | battery, firmware, DPI, polling rate, SmartShift, wheel mode, natural scrolling, thumb wheel direction, Fn inversion, Easy-Switch channel, KDE actions on the gesture, actions, mode shift, middle, back and forward buttons, gestures | MX Master 4 over Bluetooth: tested; receivers and other models untested |
 
@@ -27,6 +27,13 @@ Devices marked untested show a banner in the widget with a link to report how th
   widget shows the last values set from it; changes made with Fn shortcuts on the keyboard are
   not visible. Only the wired connection carries configuration commands; over 2.4 GHz and
   Bluetooth the keyboard cannot be configured.
+* **RK96 music visualization**: the daemon records the default output with `pw-cat` (PipeWire) and streams
+  per-key colours with the keyboard's non-saving command `06 00` at 20 frames per second. The keyboard drops
+  back to its own effect about two seconds after the last frame and rewrites its settings in flash at that
+  moment, so the daemon keeps streaming a dim idle frame during silence instead of stopping; flash is
+  written once when the visualization is switched off. The capture stream is tagged like Plasma's own
+  volume meter so it does not trigger the "microphone in use" indicator. Only the USB cable carries these
+  commands; over Bluetooth and 2.4 GHz the radio module forwards nothing but the lock-key LEDs.
 * **Logitech buttons and gestures**: a button with an action assigned is diverted over HID++ and the
   daemon runs the matching KDE global shortcut (Overview, desktop grid, show desktop, switching desktops,
   window actions, application launcher, KRunner, screenshots, media and volume). In *Gestures* mode the

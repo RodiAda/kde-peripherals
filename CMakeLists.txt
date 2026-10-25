@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(kde-peripherals VERSION 0.2.0 LANGUAGES CXX)
+project(kde-peripherals VERSION 0.3.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -20,6 +20,7 @@ add_library(peripherals-core STATIC
     daemon/LogitechDevice.cpp
     daemon/RkProtocol.cpp
     daemon/RkKeyboard.cpp
+    daemon/Spectrum.cpp
     daemon/GamepadSource.cpp
 )
 target_include_directories(peripherals-core PUBLIC daemon)
@@ -91,11 +92,11 @@ set(CPACK_PACKAGE_HOMEPAGE_URL "https://github.com/RodiAda/kde-peripherals")
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
 set(CPACK_STRIP_FILES ON)
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "plasma-workspace (>= 4:6.0), udev")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "plasma-workspace (>= 4:6.0), udev, pipewire-bin")
 set(CPACK_DEBIAN_PACKAGE_SECTION kde)
 set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
 set(CPACK_RPM_PACKAGE_LICENSE MIT)
-set(CPACK_RPM_PACKAGE_REQUIRES "plasma-workspace >= 6.0, systemd-udev")
+set(CPACK_RPM_PACKAGE_REQUIRES "plasma-workspace >= 6.0, systemd-udev, pipewire-utils")
 set(CPACK_RPM_FILE_NAME RPM-DEFAULT)
 set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /usr/lib/systemd /usr/lib/systemd/user /usr/lib/udev /usr/lib/udev/rules.d /usr/share/dbus-1 /usr/share/dbus-1/services /usr/share/plasma /usr/share/plasma/plasmoids)
 include(CPack)

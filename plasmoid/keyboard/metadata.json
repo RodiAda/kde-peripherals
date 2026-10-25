@@ -14,7 +14,7 @@
         "License": "MIT",
         "Name": "Keyboard",
         "Name[ru]": "Клавиатура",
-        "Version": "0.2.0",
+        "Version": "0.3.0",
         "Website": "https://github.com/RodiAda/kde-peripherals"
     },
     "X-Plasma-API-Minimum-Version": "6.0",

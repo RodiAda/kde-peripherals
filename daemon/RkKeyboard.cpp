@@ -8,6 +8,15 @@
 
 using namespace rk;
 
+namespace {
+
+constexpr int SampleRate = 48000;
+constexpr int WindowSamples = 2048;
+constexpr int FrameIntervalMs = 50;
+constexpr float IdleGlow = 0.08f;
+
+}
+
 bool RkKeyboard::matches(const HidrawInfo &info)
 {
     return info.vendor == 0x258A && info.product == 0x0089 && info.bus == 0x03 && info.hasReportId(ReportId);
@@ -21,7 +30,84 @@ void RkKeyboard::start()
         return;
     }
     load();
+    connect(&_frameTimer, &QTimer::timeout, this, &RkKeyboard::musicFrame);
+    _frameTimer.setInterval(FrameIntervalMs);
+    if (_music)
+        startMusic();
     render();
+}
+
+void RkKeyboard::startMusic()
+{
+    if (_audio)
+        return;
+    _samples = QVector<float>(WindowSamples, 0.0f);
+    _audio = new QProcess(this);
+    connect(_audio, &QProcess::readyReadStandardOutput, this, &RkKeyboard::readAudio);
+    connect(_audio, &QProcess::finished, this, [this] {
+        if (!_music)
+            return;
+        _error = QStringLiteral("Audio capture failed");
+        qCWarning(lcPd) << "rk: pw-cat exited:" << _audio->readAllStandardError();
+        stopMusic();
+        render();
+    });
+    _audio->start(QStringLiteral("pw-cat"),
+                  {QStringLiteral("--record"), QStringLiteral("--raw"), QStringLiteral("--format"), QStringLiteral("f32"),
+                   QStringLiteral("--rate"), QString::number(SampleRate), QStringLiteral("--channels"), QStringLiteral("1"),
+                   QStringLiteral("--latency"), QStringLiteral("20ms"), QStringLiteral("-P"),
+                   QStringLiteral("{ stream.capture.sink=true node.name=peripheralsd-music media.name=\"Keyboard lighting\" application.id=org.kde.plasma-pa application.name=peripheralsd }"),
+                   QStringLiteral("-")});
+    _sinceAudio.start();
+    _frameTimer.start();
+}
+
+void RkKeyboard::stopMusic()
+{
+    _frameTimer.stop();
+    if (_audio) {
+        _audio->disconnect(this);
+        _audio->kill();
+        _audio->waitForFinished(1000);
+        _audio->deleteLater();
+        _audio = nullptr;
+    }
+}
+
+void RkKeyboard::readAudio()
+{
+    const QByteArray data = _audio->readAllStandardOutput();
+    const int count = int(data.size() / sizeof(float));
+    if (count <= 0)
+        return;
+    const auto *values = reinterpret_cast<const float *>(data.constData());
+    if (count >= WindowSamples) {
+        _samples = QVector<float>(values + count - WindowSamples, values + count);
+    } else {
+        _samples.remove(0, count);
+        _samples.append(QVector<float>(values, values + count));
+    }
+    _sinceAudio.start();
+}
+
+void RkKeyboard::musicFrame()
+{
+    if (_sinceAudio.elapsed() > 200)
+        _samples.fill(0.0f);
+    const auto magnitudes = spectrum::bandMagnitudes(_samples.constData(), int(_samples.size()), SampleRate,
+                                                     spectrum::Columns, 40.0f, 16000.0f);
+    const auto levels = _analyzer.process(magnitudes);
+    const auto style = static_cast<spectrum::Style>(std::clamp(_musicStyle, 0, 2));
+    const QByteArray rgb = spectrum::frame(levels, style, float(_lighting.brightness) / 5.0f, _tick++, IdleGlow);
+    QByteArray payload;
+    payload.append(char(0x06));
+    payload.append(char(0x00));
+    payload.append(rgb);
+    if (!send(payload, 0, 0)) {
+        _error = QStringLiteral("Write failed");
+        stopMusic();
+        render();
+    }
 }
 
 void RkKeyboard::load()
@@ -38,6 +124,8 @@ void RkKeyboard::load()
     _lighting.blue = uint8_t(c.blue());
     _lighting.random = s.value(QStringLiteral("random"), false).toBool();
     _lighting.sleep = s.value(QStringLiteral("sleep"), _lighting.sleep).toInt();
+    _music = s.value(QStringLiteral("music"), false).toBool();
+    _musicStyle = s.value(QStringLiteral("musicStyle"), 0).toInt();
 }
 
 void RkKeyboard::save()
@@ -50,19 +138,23 @@ void RkKeyboard::save()
     s.setValue(QStringLiteral("color"), QColor(_lighting.red, _lighting.green, _lighting.blue).name());
     s.setValue(QStringLiteral("random"), _lighting.random);
     s.setValue(QStringLiteral("sleep"), _lighting.sleep);
+    s.setValue(QStringLiteral("music"), _music);
+    s.setValue(QStringLiteral("musicStyle"), _musicStyle);
     _known = true;
 }
 
-bool RkKeyboard::send(const QByteArray &payload)
+bool RkKeyboard::send(const QByteArray &payload, int gapMs, int tailMs)
 {
-    for (const QByteArray &report : frame(payload)) {
+    for (const QByteArray &report : rk::frame(payload)) {
         if (!_dev.setFeature(report)) {
             qCWarning(lcPd) << "rk:" << _dev.errorString();
             return false;
         }
-        QThread::msleep(8);
+        if (gapMs > 0)
+            QThread::msleep(gapMs);
     }
-    QThread::msleep(50);
+    if (tailMs > 0)
+        QThread::msleep(tailMs);
     return true;
 }
 
@@ -106,12 +198,35 @@ void RkKeyboard::render()
     sleep.append(option(5, QStringLiteral("Never")));
     controls.append(choice(QStringLiteral("sleep"), QStringLiteral("lighting"), QStringLiteral("Lighting off after"),
                            _lighting.sleep, sleep));
+    controls.append(toggle(QStringLiteral("music"), QStringLiteral("music"), QStringLiteral("Music visualization"), _music));
+    if (_music)
+        controls.append(choice(QStringLiteral("musicStyle"), QStringLiteral("music"), QStringLiteral("Style"), _musicStyle,
+                               {option(0, QStringLiteral("Spectrum")), option(1, QStringLiteral("Rainbow")),
+                                option(2, QStringLiteral("Pulse"))}));
     e[QStringLiteral("controls")] = controls;
     publish({e});
 }
 
-void RkKeyboard::apply(const QString &, const QJsonObject &change)
+void RkKeyboard::apply(const QString &, const QJsonObject &input)
 {
+    QJsonObject change = input;
+    if (change.contains(QStringLiteral("musicStyle"))) {
+        _musicStyle = std::clamp(change.take(QStringLiteral("musicStyle")).toInt(), 0, 2);
+        save();
+    }
+    if (change.contains(QStringLiteral("music"))) {
+        _music = change.take(QStringLiteral("music")).toBool();
+        _error.clear();
+        save();
+        if (_music)
+            startMusic();
+        else
+            stopMusic();
+    }
+    if (change.isEmpty()) {
+        render();
+        return;
+    }
     Lighting next = _lighting;
     if (change.contains(QStringLiteral("mode")))
         next.mode = std::clamp(change.value(QStringLiteral("mode")).toInt(), 1, ModeCount);
