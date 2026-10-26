@@ -55,6 +55,46 @@ int main()
     const QByteArray dark = frame(full, Style::Rainbow, 0.0f, 0);
     check(dark == QByteArray(Slots * 3, '\0'), "zero brightness is dark");
 
+    check(sceneForMode(2) == Scene::Ripples && sceneForMode(6) == Scene::Sparkle && sceneForMode(18) == Scene::Pulse
+              && sceneForMode(1) == Scene::Wave,
+          "scene mapping");
+
+    Palette red;
+    red.rainbow = false;
+    red.green = 0.0f;
+    red.blue = 0.0f;
+    SceneRenderer pulse;
+    const QByteArray quietPulse = pulse.render(QVector<float>(Columns, 0.0f), Scene::Pulse, red, 1.0f, 0.05f);
+    const QByteArray loudPulse = pulse.render(QVector<float>(Columns, 1.0f), Scene::Pulse, red, 1.0f, 0.05f);
+    check(quietPulse.size() == Slots * 3 && loudPulse.size() == Slots * 3, "scene frame size");
+    check(uint8_t(loudPulse[0]) > uint8_t(quietPulse[0]) && loudPulse[1] == 0 && loudPulse[2] == 0, "pulse follows loudness in red");
+
+    SceneRenderer dimPulse;
+    const QByteArray quietDim = dimPulse.render(QVector<float>(Columns, 0.0f), Scene::Pulse, red, 1.0f, 0.05f, Reaction{1.0f, true, true});
+    const QByteArray loudDim = dimPulse.render(QVector<float>(Columns, 1.0f), Scene::Pulse, red, 1.0f, 0.05f, Reaction{1.0f, true, true});
+    check(uint8_t(quietDim[0]) > uint8_t(loudDim[0]), "inverted pulse dims with loudness");
+
+    SceneRenderer quietThenLoud;
+    QVector<float> soft(Columns, 0.05f);
+    QByteArray softFrame;
+    for (int i = 0; i < 40; ++i)
+        softFrame = quietThenLoud.render(soft, Scene::Pulse, red, 1.0f, 0.05f);
+    check(uint8_t(softFrame[0]) > 128, "auto gain lifts quiet music to full range");
+
+    SceneRenderer ripples;
+    QVector<float> quietLevels(Columns, 0.0f);
+    for (int i = 0; i < 20; ++i)
+        ripples.render(quietLevels, Scene::Ripples, red, 1.0f, 0.05f);
+    const QByteArray idle = ripples.render(quietLevels, Scene::Ripples, red, 1.0f, 0.05f);
+    QVector<float> beat(Columns, 0.0f);
+    for (int i = 0; i < 4; ++i)
+        beat[i] = 1.0f;
+    const QByteArray hit = ripples.render(beat, Scene::Ripples, red, 1.0f, 0.05f);
+    int brighter = 0;
+    for (int slot = 0; slot < Slots; ++slot)
+        brighter += uint8_t(hit[slot * 3]) > uint8_t(idle[slot * 3]) + 40 ? 1 : 0;
+    check(brighter >= 1, "bass beat spawns a ripple");
+
     if (failures == 0)
         std::printf("spectrum: all tests passed\n");
     return failures ? 1 : 0;

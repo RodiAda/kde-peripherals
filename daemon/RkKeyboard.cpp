@@ -97,8 +97,25 @@ void RkKeyboard::musicFrame()
     const auto magnitudes = spectrum::bandMagnitudes(_samples.constData(), int(_samples.size()), SampleRate,
                                                      spectrum::Columns, 40.0f, 16000.0f);
     const auto levels = _analyzer.process(magnitudes);
-    const auto style = static_cast<spectrum::Style>(std::clamp(_musicStyle, 0, 2));
-    const QByteArray rgb = spectrum::frame(levels, style, float(_lighting.brightness) / 5.0f, _tick++, IdleGlow);
+    QByteArray rgb;
+    spectrum::Reaction reaction;
+    reaction.depth = float(_musicDepth) / 100.0f;
+    reaction.tempo = _musicTempo;
+    reaction.inverted = _musicInvert;
+    if (_musicStyle == 3 || _musicStyle == 2) {
+        spectrum::Palette palette;
+        palette.rainbow = _lighting.random || !modeInfo(_lighting.mode).color;
+        palette.red = float(_lighting.red) / 255.0f;
+        palette.green = float(_lighting.green) / 255.0f;
+        palette.blue = float(_lighting.blue) / 255.0f;
+        if (_musicStyle == 2)
+            palette.rainbow = true;
+        rgb = _scenes.render(levels, _musicStyle == 2 ? spectrum::Scene::Pulse : spectrum::sceneForMode(_lighting.mode),
+                             palette, float(_lighting.brightness) / 5.0f, float(FrameIntervalMs) / 1000.0f, reaction);
+    } else {
+        const auto style = static_cast<spectrum::Style>(std::clamp(_musicStyle, 0, 2));
+        rgb = spectrum::frame(levels, style, float(_lighting.brightness) / 5.0f, _tick++, IdleGlow, _musicInvert);
+    }
     QByteArray payload;
     payload.append(char(0x06));
     payload.append(char(0x00));
@@ -127,6 +144,9 @@ void RkKeyboard::load()
     _lighting.speedLevels = s.value(QStringLiteral("speedLevels"), 5).toInt() == 9 ? 9 : 5;
     _music = s.value(QStringLiteral("music"), false).toBool();
     _musicStyle = s.value(QStringLiteral("musicStyle"), 0).toInt();
+    _musicInvert = s.value(QStringLiteral("musicInvert"), false).toBool();
+    _musicDepth = std::clamp(s.value(QStringLiteral("musicDepth"), 100).toInt(), 10, 100);
+    _musicTempo = s.value(QStringLiteral("musicTempo"), true).toBool();
 }
 
 void RkKeyboard::save()
@@ -141,6 +161,9 @@ void RkKeyboard::save()
     s.setValue(QStringLiteral("sleep"), _lighting.sleep);
     s.setValue(QStringLiteral("music"), _music);
     s.setValue(QStringLiteral("musicStyle"), _musicStyle);
+    s.setValue(QStringLiteral("musicInvert"), _musicInvert);
+    s.setValue(QStringLiteral("musicDepth"), _musicDepth);
+    s.setValue(QStringLiteral("musicTempo"), _musicTempo);
     _known = true;
 }
 
@@ -202,8 +225,17 @@ void RkKeyboard::render()
     controls.append(toggle(QStringLiteral("music"), QStringLiteral("music"), QStringLiteral("Music visualization"), _music));
     if (_music)
         controls.append(choice(QStringLiteral("musicStyle"), QStringLiteral("music"), QStringLiteral("Style"), _musicStyle,
-                               {option(0, QStringLiteral("Spectrum")), option(1, QStringLiteral("Rainbow")),
-                                option(2, QStringLiteral("Pulse"))}));
+                               {option(3, QStringLiteral("By effect")), option(0, QStringLiteral("Spectrum")),
+                                option(1, QStringLiteral("Rainbow")), option(2, QStringLiteral("Pulse"))}));
+    if (_music) {
+        controls.append(slider(QStringLiteral("musicDepth"), QStringLiteral("music"), QStringLiteral("Reaction strength"),
+                               _musicDepth, 10, 100, 10, QStringLiteral("%")));
+        if (_musicStyle == 3 || _musicStyle == 2)
+            controls.append(toggle(QStringLiteral("musicTempo"), QStringLiteral("music"), QStringLiteral("Tempo follows the music"),
+                                   _musicTempo));
+        controls.append(toggle(QStringLiteral("musicInvert"), QStringLiteral("music"), QStringLiteral("Dim to the music"),
+                               _musicInvert));
+    }
     e[QStringLiteral("controls")] = controls;
     publish({e});
 }
@@ -212,7 +244,19 @@ void RkKeyboard::apply(const QString &, const QJsonObject &input)
 {
     QJsonObject change = input;
     if (change.contains(QStringLiteral("musicStyle"))) {
-        _musicStyle = std::clamp(change.take(QStringLiteral("musicStyle")).toInt(), 0, 2);
+        _musicStyle = std::clamp(change.take(QStringLiteral("musicStyle")).toInt(), 0, 3);
+        save();
+    }
+    if (change.contains(QStringLiteral("musicDepth"))) {
+        _musicDepth = std::clamp(change.take(QStringLiteral("musicDepth")).toInt(), 10, 100);
+        save();
+    }
+    if (change.contains(QStringLiteral("musicTempo"))) {
+        _musicTempo = change.take(QStringLiteral("musicTempo")).toBool();
+        save();
+    }
+    if (change.contains(QStringLiteral("musicInvert"))) {
+        _musicInvert = change.take(QStringLiteral("musicInvert")).toBool();
         save();
     }
     if (change.contains(QStringLiteral("music"))) {

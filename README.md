@@ -11,7 +11,7 @@ Windows or web software.
 |---|---|---|---|
 | MADLIONS MAD R+ (Compx chip, `373b:1040` MAD 8K dongle) | 2.4 GHz dongle | battery, voltage, DPI stages, polling rate up to 8 kHz, lift-off distance, sensor mode, motion sync, angle snapping, ripple control, sensor angle, debounce, button mapping, sleep timeout, long-distance mode, DPI indicator | tested |
 | MAD R, MAD R Major, MAD R Major+ and other ATK/Compx mice | 2.4 GHz dongle | same protocol | untested |
-| Royal Kludge RK96 RGB (`258a:0089`) | USB cable | lighting effect, brightness, speed, colour, rainbow mode, lighting timeout, music visualization (spectrum, rainbow, pulse) | tested |
+| Royal Kludge RK96 RGB (`258a:0089`) | USB cable | lighting effect, brightness, speed, colour, rainbow mode, lighting timeout, music visualization (follow the effect, spectrum, rainbow, pulse; reaction strength, tempo, inverted) | tested |
 | Xbox, Steam Controller, DualSense and other gamepads | Bluetooth, receiver, USB | battery and connection state from the kernel (power_supply) or BlueZ, disconnect button for Bluetooth controllers | Xbox Wireless Controller over Bluetooth: untested |
 | Logitech HID++ 2.0 devices | Unifying, Bolt, Lightspeed receivers, Bluetooth, USB | battery, firmware, DPI, polling rate, SmartShift, wheel mode, natural scrolling, thumb wheel direction, Fn inversion, Easy-Switch channel, KDE actions on the gesture, actions, mode shift, middle, back and forward buttons, gestures | MX Master 4 over Bluetooth: tested; receivers and other models untested |
 
@@ -34,6 +34,12 @@ Devices marked untested show a banner in the widget with a link to report how th
   it into a power supply and UPower shows it next to other devices. The service only accepts
   `Set(id, name, kind, percent, charging)` and `Remove(id)` over the system bus, removes devices when their
   owner disconnects, allows eight per caller and runs sandboxed with access to `/dev/uhid` only.
+* **RK96 music styles**: *By effect* draws the music in the spirit of the selected lighting effect and in its
+  colour (the custom colour or a rainbow): wave effects become a wave sped up by the bass, reactive effects
+  spawn ripples on bass beats, Stars Twinkle sparkles with the treble, steady and breathing pulse with the
+  loudness. Loudness, bass and treble each adapt to the current music, so the full brightness range is used
+  at any volume. *Reaction strength* narrows that range, *Tempo follows the music* speeds animations up on
+  loud passages, and *Dim to the music* inverts both: the keyboard is lit in silence and the music dims it.
 * **RK96 speed levels**: stock firmware has five speeds. Setting `speedLevels=9` in the `[rk-0089]` group of
   `~/.config/io.github.rodiada/peripheralsd.conf` widens the slider to nine for keyboards running a firmware
   patched for nine levels; with stock firmware speeds above five would produce garbage.

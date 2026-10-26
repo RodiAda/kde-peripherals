@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: kde-peripherals\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-25 20:23+0100\n"
+"POT-Creation-Date: 2026-10-26 23:15+0100\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -495,172 +495,188 @@ msgid "Spectrum"
 msgstr "Спектр"
 
 #: plasmoid/ui/main.qml:262
+msgid "By effect"
+msgstr "По эффекту"
+
+#: plasmoid/ui/main.qml:263
+msgid "Dim to the music"
+msgstr "Наоборот: музыка гасит подсветку"
+
+#: plasmoid/ui/main.qml:264
+msgid "Reaction strength"
+msgstr "Сила реакции"
+
+#: plasmoid/ui/main.qml:265
+msgid "Tempo follows the music"
+msgstr "Темп от музыки"
+
+#: plasmoid/ui/main.qml:266
 msgid "Rainbow"
 msgstr "Радуга"
 
-#: plasmoid/ui/main.qml:263
+#: plasmoid/ui/main.qml:267
 msgid "Pulse"
 msgstr "Пульс"
 
-#: plasmoid/ui/main.qml:264
+#: plasmoid/ui/main.qml:268
 msgid "Could not capture audio from PipeWire"
 msgstr "Не удалось получить звук из PipeWire"
 
-#: plasmoid/ui/main.qml:265
+#: plasmoid/ui/main.qml:269
 msgid "Do nothing"
 msgstr "Ничего не делать"
 
-#: plasmoid/ui/main.qml:266
+#: plasmoid/ui/main.qml:270
 msgid "Previous desktop"
 msgstr "Предыдущий рабочий стол"
 
-#: plasmoid/ui/main.qml:267
+#: plasmoid/ui/main.qml:271
 msgid "Next desktop"
 msgstr "Следующий рабочий стол"
 
-#: plasmoid/ui/main.qml:268
+#: plasmoid/ui/main.qml:272
 msgid "Maximize window"
 msgstr "Развернуть окно"
 
-#: plasmoid/ui/main.qml:269
+#: plasmoid/ui/main.qml:273
 msgid "Minimize window"
 msgstr "Свернуть окно"
 
-#: plasmoid/ui/main.qml:270
+#: plasmoid/ui/main.qml:274
 msgid "Play/pause"
 msgstr "Воспроизведение/пауза"
 
-#: plasmoid/ui/main.qml:271
+#: plasmoid/ui/main.qml:275
 msgid "Next track"
 msgstr "Следующий трек"
 
-#: plasmoid/ui/main.qml:272
+#: plasmoid/ui/main.qml:276
 msgid "Previous track"
 msgstr "Предыдущий трек"
 
-#: plasmoid/ui/main.qml:273
+#: plasmoid/ui/main.qml:277
 msgid "Volume up"
 msgstr "Громче"
 
-#: plasmoid/ui/main.qml:274
+#: plasmoid/ui/main.qml:278
 msgid "Volume down"
 msgstr "Тише"
 
-#: plasmoid/ui/main.qml:275
+#: plasmoid/ui/main.qml:279
 msgid "Mute"
 msgstr "Выключить звук"
 
-#: plasmoid/ui/main.qml:276
+#: plasmoid/ui/main.qml:280
 msgid "Gesture up"
 msgstr "Жест вверх"
 
-#: plasmoid/ui/main.qml:277
+#: plasmoid/ui/main.qml:281
 msgid "Gesture down"
 msgstr "Жест вниз"
 
-#: plasmoid/ui/main.qml:278
+#: plasmoid/ui/main.qml:282
 msgid "Gesture left"
 msgstr "Жест влево"
 
-#: plasmoid/ui/main.qml:279
+#: plasmoid/ui/main.qml:283
 msgid "Gesture right"
 msgstr "Жест вправо"
 
-#: plasmoid/ui/main.qml:280
+#: plasmoid/ui/main.qml:284
 msgid "Press without moving"
 msgstr "Нажатие без движения"
 
-#: plasmoid/ui/main.qml:281
+#: plasmoid/ui/main.qml:285
 msgid "Natural scrolling"
 msgstr "Естественная прокрутка"
 
-#: plasmoid/ui/main.qml:282
+#: plasmoid/ui/main.qml:286
 msgid "Media keys without Fn"
 msgstr "Медиаклавиши без Fn"
 
-#: plasmoid/ui/main.qml:283
+#: plasmoid/ui/main.qml:287
 msgid "Easy-Switch channel"
 msgstr "Канал Easy-Switch"
 
-#: plasmoid/ui/main.qml:284
+#: plasmoid/ui/main.qml:288
 msgid "Device is asleep"
 msgstr "Устройство спит"
 
-#: plasmoid/ui/main.qml:285
+#: plasmoid/ui/main.qml:289
 msgid "Unsupported polling rate"
 msgstr "Эта частота опроса не поддерживается"
 
-#: plasmoid/ui/main.qml:286
+#: plasmoid/ui/main.qml:290
 msgid "Unsupported lift-off distance"
 msgstr "Эта высота отрыва не поддерживается"
 
-#: plasmoid/ui/main.qml:287
+#: plasmoid/ui/main.qml:291
 msgid "Invalid DPI stages"
 msgstr "Неверные ступени DPI"
 
-#: plasmoid/ui/main.qml:288
+#: plasmoid/ui/main.qml:292
 msgid "Invalid button action"
 msgstr "Неверное действие кнопки"
 
-#: plasmoid/ui/main.qml:289
+#: plasmoid/ui/main.qml:293
 msgid "Mouse is asleep"
 msgstr "Мышь спит"
 
-#: plasmoid/ui/main.qml:290
+#: plasmoid/ui/main.qml:294
 msgid "Write failed"
 msgstr "Не удалось записать настройку"
 
-#: plasmoid/ui/main.qml:291
+#: plasmoid/ui/main.qml:295
 msgid "Invalid value"
 msgstr "Недопустимое значение"
 
-#: plasmoid/ui/main.qml:292
+#: plasmoid/ui/main.qml:296
 msgid "At least one button must keep the left click"
 msgstr "Хотя бы одна кнопка должна остаться левым кликом"
 
-#: plasmoid/ui/main.qml:296
+#: plasmoid/ui/main.qml:300
 msgid "Channel %1"
 msgstr "Канал %1"
 
-#: plasmoid/ui/main.qml:310
+#: plasmoid/ui/main.qml:314
 msgid "asleep"
 msgstr "спит"
 
-#: plasmoid/ui/main.qml:312
+#: plasmoid/ui/main.qml:316
 #, javascript-format
 msgid "%1%, charging"
 msgstr "%1%, заряжается"
 
-#: plasmoid/ui/main.qml:312 plasmoid/ui/main.qml:637
+#: plasmoid/ui/main.qml:316 plasmoid/ui/main.qml:641
 #, javascript-format
 msgid "%1%"
 msgstr "%1%"
 
-#: plasmoid/ui/main.qml:323
+#: plasmoid/ui/main.qml:327
 msgid "peripheralsd is not running"
 msgstr "peripheralsd не запущена"
 
-#: plasmoid/ui/main.qml:469
+#: plasmoid/ui/main.qml:473
 msgid "DPI stages"
 msgstr "Ступени DPI"
 
-#: plasmoid/ui/main.qml:517
+#: plasmoid/ui/main.qml:521
 msgid "Remove stage"
 msgstr "Убрать ступень"
 
-#: plasmoid/ui/main.qml:525
+#: plasmoid/ui/main.qml:529
 msgid "Add stage"
 msgstr "Добавить ступень"
 
-#: plasmoid/ui/main.qml:622
+#: plasmoid/ui/main.qml:626
 msgid "firmware %1"
 msgstr "прошивка %1"
 
-#: plasmoid/ui/main.qml:662
+#: plasmoid/ui/main.qml:666
 msgid "Service not running"
 msgstr "Служба не запущена"
 
-#: plasmoid/ui/main.qml:663
+#: plasmoid/ui/main.qml:667
 msgid ""
 "Start it with:\n"
 "systemctl --user start peripheralsd"
@@ -668,12 +684,12 @@ msgstr ""
 "Запустите её командой:\n"
 "systemctl --user start peripheralsd"
 
-#: plasmoid/ui/main.qml:664
+#: plasmoid/ui/main.qml:668
 msgid "Turn on a controller connected over Bluetooth, a receiver or a cable."
 msgstr ""
 "Включите геймпад, подключённый по Bluetooth, через приёмник или по проводу."
 
-#: plasmoid/ui/main.qml:665
+#: plasmoid/ui/main.qml:669
 msgid ""
 "Connect a supported device. Access to it is granted by the udev rule "
 "installed with this widget."
@@ -681,29 +697,29 @@ msgstr ""
 "Подключите поддерживаемое устройство. Доступ к нему даёт правило udev, "
 "которое ставится вместе с виджетом."
 
-#: plasmoid/ui/main.qml:689
+#: plasmoid/ui/main.qml:693
 msgid "Support for this device has not been tested on real hardware yet."
 msgstr "Поддержка этого устройства ещё не проверялась на настоящем железе."
 
-#: plasmoid/ui/main.qml:692
+#: plasmoid/ui/main.qml:696
 msgid "Report how it works"
 msgstr "Сообщить, как работает"
 
-#: plasmoid/ui/main.qml:704
+#: plasmoid/ui/main.qml:708
 msgid "The keyboard is asleep or out of range. Press any key to wake it up."
 msgstr ""
 "Клавиатура спит или вне зоны связи. Нажмите любую клавишу, чтобы разбудить "
 "её."
 
-#: plasmoid/ui/main.qml:705
+#: plasmoid/ui/main.qml:709
 msgid "The controller is off or out of range."
 msgstr "Геймпад выключен или вне зоны связи."
 
-#: plasmoid/ui/main.qml:706
+#: plasmoid/ui/main.qml:710
 msgid "The mouse is asleep or out of range. Move it to wake it up."
 msgstr "Мышь спит или вне зоны связи. Подвигайте её, чтобы разбудить."
 
-#: plasmoid/ui/main.qml:714
+#: plasmoid/ui/main.qml:718
 msgid ""
 "This keyboard cannot report its settings. The values below are the last ones "
 "set from this widget; changes made with Fn shortcuts are not shown."
@@ -711,7 +727,7 @@ msgstr ""
 "Клавиатура не умеет сообщать свои настройки. Ниже — последние значения, "
 "заданные из этого виджета; изменения через сочетания с Fn здесь не видны."
 
-#: plasmoid/ui/main.qml:715
+#: plasmoid/ui/main.qml:719
 msgid ""
 "This keyboard cannot report its settings. The values below are defaults "
 "until you change something here."
